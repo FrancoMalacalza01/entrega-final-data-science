@@ -1,0 +1,19 @@
+# Dependencias del servicio, no del analisis.
+#
+# El entorno que sirve la API no es el mismo que el que corre los notebooks: no
+# necesita jupyter, matplotlib ni seaborn, que pesan y tardan en instalarse. Separarlos
+# hace que la imagen de despliegue sea chica y que el build entre en la capa gratuita
+# de cualquier plataforma.
+#
+# Las versiones son LAS MISMAS que en requirements.txt y eso no es opcional:
+# scikit-learn tiene que ser exactamente la version con la que se serializo el modelo,
+# o joblib puede negarse a cargarlo o cargarlo con otro comportamiento.
+
+pandas==3.0.5
+numpy==2.5.3
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+
+fastapi==0.162.0
+uvicorn[standard]==0.53.0

@@ -75,10 +75,12 @@ preentrega-data-science/
 │   ├── produccion_filtrada.csv.gz    # producción mensual, recortada a nuestro alcance
 │   └── pozos_ubicacion.csv           # coordenadas y cota de los pozos
 ├── docs/
+│   ├── DESPLIEGUE.md                 # cómo poner la API en un servidor público
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
-│   ├── presentacion.pdf              # 14 diapositivas con las que se presenta el trabajo
+│   ├── presentacion.pdf              # 17 diapositivas con las que se presenta el trabajo
 │   └── presentacion.pptx             # las mismas diapositivas, con las notas del orador
 ├── Dockerfile                        # para desplegar la API
+├── requirements-api.txt              # dependencias del servicio, sin las del análisis
 ├── ejemplo_pozo.json                 # cuerpo de ejemplo para POST /predict
 ├── models/
 │   ├── modelo.joblib                 # el Random Forest entrenado que sirve la API
@@ -601,8 +603,16 @@ docker build -t pozos-api .
 docker run -p 8000:8000 pozos-api
 ```
 
-En **Render** o **Hugging Face Spaces**, conectando el repositorio: el `Dockerfile` ya define
-todo. Si `models/` no estuviera, la imagen entrena el modelo durante la construcción.
+En **Render** o **Hugging Face Spaces** alcanza con conectar el repositorio: el `Dockerfile`
+ya define todo y `models/` está versionado, así que la plataforma no tiene que entrenar nada.
+
+El servicio usa **`requirements-api.txt`** y no `requirements.txt`: no necesita jupyter ni las
+librerías de gráficos, y sacarlas hace que la imagen entre holgada en cualquier capa gratuita.
+Las versiones coinciden con las del análisis, y la de `scikit-learn` tiene que coincidir sí o
+sí, porque es la que serializó el modelo.
+
+📄 **[Guía de despliegue paso a paso](docs/DESPLIEGUE.md)** — Render, Hugging Face Spaces y
+Docker, con qué revisar cuando algo falla.
 
 ## Uso responsable del modelo
 
