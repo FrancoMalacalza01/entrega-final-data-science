@@ -8,6 +8,13 @@ Trabajo grupal. Las decisiones de alcance, criterio y metodología las discutimo
 entre los tres; nos apoyamos en herramientas de IA como copiloto, y lo documentamos al final
 de este README.
 
+**El modelo está desplegado y se puede probar ahora mismo:**
+**<https://entregafinal-data-science.onrender.com/docs>** — se le pasa el diseño de un pozo
+(metros de rama, etapas, arena, agua) y devuelve la producción estimada a doce meses. Corre en
+una capa gratuita que duerme el servicio tras quince minutos sin uso, así que la primera
+petición puede tardar hasta un minuto; las siguientes son inmediatas. El detalle está en
+[La API de predicción](#la-api-de-predicción).
+
 ## El problema
 
 Un pozo no convencional no produce por sí solo: la roca de Vaca Muerta tiene el petróleo
