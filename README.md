@@ -199,6 +199,38 @@ pozos del alcance** en lugar de los 1.917 con producción medida: 686 pozos más
 | **5** | 12 y 13 | Reducción de dimensionalidad con SVD y supervivencia de las familias al comprimir |
 | **6** | 14 a 16 | Ward, GMM y DBSCAN; validación externa contra la producción; conclusiones |
 
+## Arquitectura del modelo
+
+Todo el preprocesamiento vive **dentro** de un `Pipeline` de scikit-learn. No es una
+preferencia de estilo: es lo que garantiza que el imputador y el codificador se ajusten
+únicamente con los datos de entrenamiento. Calcularlos sobre el conjunto completo filtraría
+información del test al modelo, y el resultado dejaría de significar lo que dice.
+
+```
+Pipeline
+├── ColumnTransformer
+│   ├── num  → SimpleImputer(strategy="median")        sobre 9 variables numéricas
+│   └── cat  → OneHotEncoder(handle_unknown="ignore")  sobre `operadora`
+└── RandomForestRegressor(n_estimators=600, min_samples_leaf=8,
+                          max_features=0.4, random_state=42)
+```
+
+| | |
+|---|---|
+| **Entrada** | 9 numéricas + `operadora` → **19 columnas** después del one-hot |
+| **Salida** | m³ de petróleo acumulados en los primeros 12 meses |
+| **Imputación** | mediana, y solo hace falta en `duracion_fractura_dias` (8 casos en train) |
+| **Categórica** | `operadora`, agrupando bajo «otras» a las de menos de 40 pozos: 10 categorías |
+| **`handle_unknown="ignore"`** | una operadora que el modelo no vio se codifica como todo ceros en lugar de romper |
+
+Los modelos lineales usan el mismo esquema con dos cambios: `StandardScaler` después de
+imputar, porque la escala sí les importa, y `drop="first"` en el codificador para evitar la
+colinealidad perfecta entre las indicadoras.
+
+**El mismo objeto `Pipeline` es el que sirve la API.** Se serializa entero con `joblib`, así
+que el preprocesamiento viaja con el modelo y la predicción en producción recorre exactamente
+el mismo camino que en el notebook.
+
 ## Resultados del modelado
 
 **Modelo elegido: Random Forest.** Evaluado sobre los 619 pozos fracturados en 2024-2025, con
