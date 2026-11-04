@@ -529,6 +529,15 @@ fuera del ámbito técnico.
 El modelo no se queda en el notebook: se sirve como una API HTTP, de modo que cualquier
 sistema pueda pedirle una estimación para un diseño que todavía no se fracturó.
 
+> 🟢 **Desplegada y en funcionamiento:** **<https://entregafinal-data-science.onrender.com/docs>**
+>
+> Es la documentación interactiva: se puede probar el endpoint desde el navegador, sin escribir
+> código. Corre en la capa gratuita de Render, que **duerme el servicio tras quince minutos sin
+> uso**: la primera petición puede tardar hasta un minuto en despertarlo. Las siguientes son
+> inmediatas.
+
+Para levantarla en local:
+
 ```bash
 pip install -r requirements.txt
 python src/entrenar.py          # entrena y guarda models/modelo.joblib
@@ -550,7 +559,7 @@ FastAPI, donde se puede probar el endpoint sin escribir una línea de código.
 ### Un ejemplo
 
 ```bash
-curl -X POST http://127.0.0.1:8000/predict \
+curl -X POST https://entregafinal-data-science.onrender.com/predict \
   -H 'Content-Type: application/json' \
   -d @ejemplo_pozo.json
 ```

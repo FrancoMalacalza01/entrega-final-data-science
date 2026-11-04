@@ -2,8 +2,12 @@
 
 Guía para poner `src/app.py` en un servidor público y poder demostrarla en vivo.
 
+> ✅ **Este proyecto ya está desplegado en Render:** <https://entregafinal-data-science.onrender.com/docs>
+>
+> Lo que sigue documenta cómo se hizo y cómo repetirlo, en Render o en las alternativas.
+
 Hay dos caminos y los dos son gratuitos. **Render** es el más parecido a un servicio real y
-el que recomendamos. **Hugging Face Spaces** es más simple y no se duerme, que para una
+es el que usamos. **Hugging Face Spaces** es más simple y no se duerme, que para una
 demostración en clase es una ventaja concreta.
 
 ---
