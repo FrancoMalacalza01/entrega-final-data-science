@@ -16,7 +16,7 @@ demostración en clase es una ventaja concreta.
 
 Lo único que hace falta:
 
-- El repositorio en GitHub, que ya está: `github.com/FrancoMalacalza01/preentrega-data-science`
+- El repositorio en GitHub, que ya está: `github.com/FrancoMalacalza01/entrega-final-data-science`
 - Una cuenta en la plataforma elegida (se crea con la cuenta de GitHub)
 
 **No hace falta entrenar nada**: `models/modelo.joblib` está versionado en el repositorio, así
@@ -41,7 +41,7 @@ Y abrir **http://127.0.0.1:8000/docs**. Si eso anda, lo que siga es configuraci�
 
 1. Entrar a **render.com** e iniciar sesión con GitHub.
 2. **New** → **Web Service**.
-3. Conectar el repositorio `preentrega-data-science`. Si no aparece, usar **Configure account**
+3. Conectar el repositorio `entrega-final-data-science`. Si no aparece, usar **Configure account**
    y darle acceso a Render.
 
 ### 2. Configurar

@@ -38,7 +38,7 @@ __all__ = [
 # --------------------------------------------------------------------------- #
 
 URL_REPO = ("https://raw.githubusercontent.com/FrancoMalacalza01/"
-            "preentrega-data-science/main/data/")
+            "entrega-final-data-science/main/data/")
 
 # Los notebooks se abren desde notebooks/, pero los scripts corren desde la raiz.
 CANDIDATOS_DATA = (Path("data"), Path("..") / "data")

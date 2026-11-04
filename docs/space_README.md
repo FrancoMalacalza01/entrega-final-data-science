@@ -62,7 +62,7 @@ perforaron.
 ## El proyecto completo
 
 Código, notebooks y documentación:
-**[github.com/FrancoMalacalza01/preentrega-data-science](https://github.com/FrancoMalacalza01/preentrega-data-science)**
+**[github.com/FrancoMalacalza01/entrega-final-data-science](https://github.com/FrancoMalacalza01/entrega-final-data-science)**
 
 Proyecto final del curso de Ciencia de Datos — EnergIA Digital 2026.
 Franco Malacalza · Martín Gerbaldo · Carolina Bailón

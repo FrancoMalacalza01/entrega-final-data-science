@@ -67,7 +67,7 @@ como formación productiva.
 ## Estructura del repositorio
 
 ```
-preentrega-data-science/
+entrega-final-data-science/
 ├── README.md
 ├── requirements.txt
 ├── data/
