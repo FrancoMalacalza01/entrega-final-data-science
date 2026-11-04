@@ -92,59 +92,91 @@ diez minutos antes de presentar y dejarla ahí. Mientras haya tráfico no se due
 
 ## Camino B — Hugging Face Spaces
 
-Más simple y **no se duerme**, que para la clase 32 es la ventaja que importa.
+Más simple y **no se duerme**, que para la clase 32 es la ventaja que importa. Son cuatro
+pasos y el proyecto ya está preparado para los cuatro.
 
 ### 1. Crear el Space
 
-1. Entrar a **huggingface.co**, iniciar sesión.
-2. **New** → **Space**.
+1. Entrar a **huggingface.co**, iniciar sesión (se puede con la cuenta de GitHub).
+2. Arriba a la derecha: **New** → **Space**.
 3. Completar:
-   - **Space name:** `pozos-vaca-muerta`
-   - **License:** la que corresponda
-   - **Space SDK:** **Docker** → **Blank**
-   - **Visibility:** Public
 
-### 2. Subir el proyecto
+| Campo | Valor |
+|---|---|
+| **Owner** | tu usuario |
+| **Space name** | `pozos-vaca-muerta` |
+| **License** | `mit` |
+| **Space SDK** | **Docker** → plantilla **Blank** |
+| **Hardware** | *CPU basic · free* |
+| **Visibility** | **Public** |
 
-Hugging Face da un repositorio git propio. Desde una copia local del proyecto:
+**Create Space**. Queda un repositorio vacío con un `README.md` generado por Hugging Face.
+
+### 2. Generar un token de escritura
+
+En **huggingface.co/settings/tokens** → **New token** → tipo **Write**. Copiarlo: se usa como
+contraseña en el paso siguiente y no se vuelve a mostrar.
+
+> El token es una credencial: no se comparte ni se pega en un chat, un ticket o un archivo del
+> repositorio.
+
+### 3. Subir el proyecto
+
+Desde una copia local del repositorio, con `TU_USUARIO` reemplazado:
 
 ```bash
 git remote add space https://huggingface.co/spaces/TU_USUARIO/pozos-vaca-muerta
-git push space main
+git push space main --force
 ```
 
-La primera vez pide usuario y un *token* de escritura, que se genera en
-**Settings → Access Tokens** de la cuenta de Hugging Face.
+Pide usuario (el de Hugging Face) y contraseña (**el token**, no la contraseña de la cuenta).
 
-### 3. Declarar el puerto
+El `--force` es a propósito: el Space arranca con un commit propio que no comparte historia
+con el nuestro, así que hay que reemplazarlo.
 
-Spaces publica el puerto **7860**, no el 8000. Hay que decírselo agregando al principio del
-`README.md` un encabezado como éste:
+Se suben unos **14 MB**, sobre todo el modelo entrenado (3,6 MB), los datos (3,5 MB) y los PDF
+de `docs/` (3,6 MB). Ninguno llega al límite que obligaría a usar Git LFS, así que no hace
+falta configurar nada.
+
+### 4. Declarar el puerto
+
+Éste es el paso que se olvida y hace que el Space quede en *Build error* o en blanco.
+
+Hugging Face lee la configuración del Space de un **encabezado YAML al principio del
+`README.md`**. Nuestro `README.md` es el del proyecto y no lo trae, así que el Space no sabe en
+qué puerto escucha el contenedor y prueba el 7860, mientras nuestra imagen escucha en el 8000.
+
+Ya está resuelto: **[`docs/space_README.md`](space_README.md)** es un README listo para el
+Space, con el encabezado correcto y una descripción del servicio.
+
+En la web del Space: pestaña **Files** → `README.md` → el lápiz de editar → **reemplazar todo
+el contenido** por el de `docs/space_README.md` → **Commit changes to main**.
+
+El encabezado que importa es éste:
 
 ```yaml
 ---
-title: Pozos Vaca Muerta
-emoji: 🛢️
-colorFrom: blue
-colorTo: gray
+title: Productividad de pozos en Vaca Muerta
 sdk: docker
 app_port: 8000
 ---
 ```
 
-Con `app_port: 8000` queda apuntando al puerto que expone nuestro `Dockerfile` y no hace falta
-tocar nada más.
+`app_port: 8000` es el único valor que no se puede cambiar sin tocar también el `Dockerfile`.
 
-> Ese encabezado es específico de Hugging Face. Si se agrega al README del repositorio
-> principal, GitHub lo muestra como una tabla rara al principio. Conviene mantenerlo solo en
-> el Space, o usar un README aparte para él.
+### 5. Comprobar
 
-### 4. Comprobar
+El Space reconstruye solo y tarda entre cinco y diez minutos la primera vez. La pestaña
+**Logs** muestra el avance; cuando termina, el estado pasa a **Running**.
 
-El Space construye la imagen y queda en `https://TU_USUARIO-pozos-vaca-muerta.hf.space`.
-La documentación interactiva, en `/docs` de esa misma dirección.
+- La aplicación: `https://TU_USUARIO-pozos-vaca-muerta.hf.space`
+- La documentación interactiva: `https://TU_USUARIO-pozos-vaca-muerta.hf.space/docs`
 
----
+```bash
+curl https://TU_USUARIO-pozos-vaca-muerta.hf.space/health
+```
+
+Tiene que responder `{"estado":"ok","modelo_cargado":true}`.
 
 ## Camino C — Solo con Docker, en cualquier servidor
 
@@ -181,6 +213,8 @@ docker run -e PORT=9000 -p 9000:9000 pozos-api
 | Avisos al cargar el modelo | La versión de scikit-learn del servidor no es la que serializó el artefacto | Tiene que ser `1.9.1` exacta, como está fijado en `requirements-api.txt` |
 | La primera petición tarda un minuto | El plan gratuito de Render durmió el servicio | Es esperable. Despertarlo antes de presentar |
 | Se queda sin memoria | La capa gratuita da 512 MB | No entrenar en el servidor: usar el `models/` versionado, que es lo que hace el `Dockerfile` |
+| El Space queda en blanco o en *Build error* | Falta el encabezado YAML en el `README.md` del Space, o `app_port` no es 8000 | Paso 4 del camino B: reemplazar el README del Space por `docs/space_README.md` |
+| `git push space` rechaza el envío | El Space arranca con una historia propia | Usar `git push space main --force`, como indica el paso 3 |
 
 ---
 

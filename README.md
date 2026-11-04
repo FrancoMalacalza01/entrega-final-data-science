@@ -76,6 +76,7 @@ preentrega-data-science/
 │   └── pozos_ubicacion.csv           # coordenadas y cota de los pozos
 ├── docs/
 │   ├── DESPLIEGUE.md                 # cómo poner la API en un servidor público
+│   ├── space_README.md               # README listo para Hugging Face Spaces
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
 │   ├── presentacion.pdf              # 17 diapositivas con las que se presenta el trabajo
 │   └── presentacion.pptx             # las mismas diapositivas, con las notas del orador
