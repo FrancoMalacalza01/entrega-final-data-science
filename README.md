@@ -184,7 +184,8 @@ pozos del alcance** en lugar de los 1.917 con producción medida: 686 pozos más
 | **2** | 4 a 6 | Estandarización, diagnóstico de extremos y acotamiento |
 | **3** | 7 a 9 | Inercia, silueta, Calinski-Harabasz, Davies-Bouldin y estabilidad entre semillas |
 | **4** | 10 y 11 | Las cuatro familias, su perfil, PCA y su evolución en el tiempo |
-| **5** | 12 a 14 | Ward, GMM y DBSCAN; validación externa contra la producción; conclusiones |
+| **5** | 12 y 13 | Reducción de dimensionalidad con SVD y supervivencia de las familias al comprimir |
+| **6** | 14 a 16 | Ward, GMM y DBSCAN; validación externa contra la producción; conclusiones |
 
 ## Resultados del modelado
 
@@ -374,6 +375,10 @@ hay contradicción: predecir la producción y describir el diseño son preguntas
   dejamos argumentado.
 - **`n_init` no es decorativo:** con 10 arranques, k=4 daba agrupamientos distintos según la semilla
   (ARI 0,26); con 200, siempre el mismo (ARI 0,99).
+- **Varianza explicada no es importancia.** Al comprimir con SVD, el agrupamiento sobrevive con tres
+  componentes (ARI 0,958) y se rompe con dos (0,374). La componente que se pierde aporta apenas el
+  17% de la varianza y es casi exclusivamente `ratio_arena_importada`: sin ella, esa familia se
+  disuelve. Descartar componentes por su peso habría borrado el grupo más distintivo.
 
 ## Qué cambiaría una operadora: la lectura no técnica
 
