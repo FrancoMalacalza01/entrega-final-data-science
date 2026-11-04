@@ -21,3 +21,10 @@ seaborn==0.13.2
 # Solo provee la interfaz para abrir los notebooks: no interviene en los resultados,
 # asi que no hace falta fijarla.
 jupyter>=1.0
+
+# --- API de prediccion (src/app.py) ------------------------------------------------
+# Fijadas tambien con ==, por la misma razon que las de arriba: el servicio que se
+# despliega tiene que ser el mismo que probamos. joblib serializa el modelo entrenado.
+fastapi==0.162.0
+uvicorn[standard]==0.53.0
+joblib==1.6.0

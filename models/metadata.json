@@ -1,0 +1,44 @@
+{
+  "entrenado": "2026-11-04",
+  "modelo": "RandomForestRegressor",
+  "objetivo": "m3 de petroleo acumulados en los primeros 12 meses",
+  "pozos_entrenamiento": 1917,
+  "variables": [
+    "longitud_rama_horizontal_m",
+    "arena_por_metro",
+    "agua_por_metro",
+    "espaciamiento_etapas_m",
+    "ratio_agua_arena",
+    "ratio_arena_importada",
+    "presion_maxima_psi",
+    "potencia_equipos_fractura_hp",
+    "duracion_fractura_dias",
+    "operadora"
+  ],
+  "operadoras_conocidas": [
+    "otras",
+    "pan american energy sl",
+    "phoenix global resources s.a.",
+    "pluspetrol s.a.",
+    "shell argentina s.a.",
+    "tecpetrol s.a.",
+    "total austral s.a.",
+    "vista energy argentina sau",
+    "vista oil & gas argentina sau",
+    "ypf s.a."
+  ],
+  "metricas_validacion_temporal": {
+    "MAE": 10596.265610646116,
+    "RMSE": 14828.979793159395,
+    "R2": 0.26267569741802366,
+    "MAE_referencia": 14138.247218712439,
+    "mejora_vs_referencia": 0.2505248036247656
+  },
+  "nota_metricas": "Medidas sobre un modelo entrenado solo con los 1,298 pozos fracturados hasta 2023 y evaluado sobre los 619 de 2024-2025. El modelo que sirve la API se reentreno con los 1,917 pozos.",
+  "versiones": {
+    "scikit-learn": "1.9.1",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "semilla": 42
+}

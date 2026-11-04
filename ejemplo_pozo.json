@@ -1,0 +1,11 @@
+{
+  "longitud_rama_horizontal_m": 2800,
+  "cantidad_fracturas": 48,
+  "arena_bombeada_nacional_tn": 10900,
+  "arena_bombeada_importada_tn": 0,
+  "agua_inyectada_m3": 69400,
+  "presion_maxima_psi": 11000,
+  "potencia_equipos_fractura_hp": 25000,
+  "duracion_fractura_dias": 40,
+  "operadora": "ypf s.a."
+}

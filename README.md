@@ -78,8 +78,17 @@ preentrega-data-science/
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
 │   ├── presentacion.pdf              # 14 diapositivas con las que se presenta el trabajo
 │   └── presentacion.pptx             # las mismas diapositivas, con las notas del orador
+├── Dockerfile                        # para desplegar la API
+├── ejemplo_pozo.json                 # cuerpo de ejemplo para POST /predict
+├── models/
+│   ├── modelo.joblib                 # el Random Forest entrenado que sirve la API
+│   └── metadata.json                 # ficha del modelo: fecha, métricas, versiones
 ├── src/
-│   └── utils.py                      # funciones compartidas por los cuatro notebooks
+│   ├── utils.py                      # funciones compartidas por los cuatro notebooks
+│   ├── caracteristicas.py            # variables de intensidad: entrenamiento y API
+│   ├── entrenar.py                   # entrena y guarda el modelo
+│   ├── model.py                      # carga el modelo y predice
+│   └── app.py                        # la API FastAPI
 └── notebooks/
     ├── 01_eda_preentrega2.ipynb         # análisis exploratorio y limpieza
     ├── 02_modelado_preentrega3.ipynb    # regresión: cuántos m³ produce un pozo
@@ -479,6 +488,160 @@ fuera del ámbito técnico.
   "petróleo acumulado a 12 meses" sería evaluarlos con la métrica equivocada.
 - **Validez temporal acotada.** Está validado sobre pozos de 2024-2025. Si el diseño sigue
   cambiando, hay que reentrenar.
+
+## La API de predicción
+
+El modelo no se queda en el notebook: se sirve como una API HTTP, de modo que cualquier
+sistema pueda pedirle una estimación para un diseño que todavía no se fracturó.
+
+```bash
+pip install -r requirements.txt
+python src/entrenar.py          # entrena y guarda models/modelo.joblib
+uvicorn src.app:app --reload    # levanta el servicio
+```
+
+Y en el navegador, **http://127.0.0.1:8000/docs**: la documentación interactiva que genera
+FastAPI, donde se puede probar el endpoint sin escribir una línea de código.
+
+### Los cuatro endpoints
+
+| Método | Ruta | Para qué |
+|---|---|---|
+| `GET` | `/` | Ficha del servicio |
+| `GET` | `/health` | Estado. Devuelve 503 si el modelo no está entrenado |
+| `GET` | `/modelo` | Cuándo se entrenó, con cuántos pozos, con qué métricas y qué operadoras conoce |
+| `POST` | `/predict` | La estimación |
+
+### Un ejemplo
+
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+  -H 'Content-Type: application/json' \
+  -d @ejemplo_pozo.json
+```
+
+```json
+{
+  "prediccion_m3": 38506.0,
+  "rango_p10_p90_m3": [26915.1, 49433.9],
+  "variables_derivadas": {
+    "arena_por_metro": 3.893,
+    "agua_por_metro": 24.786,
+    "espaciamiento_etapas_m": 58.333,
+    "ratio_agua_arena": 6.367,
+    "ratio_arena_importada": 0.0
+  },
+  "operadora_conocida": true
+}
+```
+
+### Qué recibe y qué devuelve
+
+La API pide **las decisiones de diseño tal como se declaran**, no las variables del modelo:
+metros de rama, cantidad de etapas, toneladas de arena nacional e importada, metros cúbicos
+de agua, presión, potencia, días de operación y operadora. Las **variables de intensidad las
+calcula el servicio**, con las mismas fórmulas que se usaron para entrenar —viven en
+`src/caracteristicas.py` y las importan tanto el entrenamiento como la API, para que no
+puedan separarse— y las devuelve en la respuesta para que se vea qué entró al modelo.
+
+Además de la estimación devuelve un **rango**: cada uno de los 600 árboles del bosque vota un
+número, y los percentiles 10 y 90 de esos votos dan una idea del desacuerdo. No es un
+intervalo de confianza estadístico, pero es más honesto que un número solo, sobre todo
+porque el modelo comprime sus predicciones hacia el centro.
+
+Y marca si la **operadora es conocida**. Una que el modelo no vio al entrenar no rompe nada
+—el codificador la trata como todo ceros— pero la estimación pierde el aporte de esa
+variable, y conviene saberlo.
+
+### Lo que responde ante el diseño
+
+Las dos palancas del modelo se ven pidiéndole estimaciones y cambiando una sola cosa:
+
+| Alargar la rama (arena, agua y etapas en proporción) | Estimación |
+|---|---|
+| 2.000 m, 34 etapas | 29.224 m³ |
+| 2.800 m, 48 etapas | 38.506 m³ |
+| 3.600 m, 62 etapas | 49.903 m³ |
+
+| Apretar las etapas (todo lo demás igual) | Estimación |
+|---|---|
+| 28 etapas, una cada 100 m | 33.365 m³ |
+| 40 etapas, una cada 70 m | 36.871 m³ |
+| 56 etapas, una cada 50 m | 38.067 m³ |
+
+La primera tabla sube con fuerza y la segunda se aplana: es, en estimaciones concretas, el
+mismo resultado que los coeficientes del punto 20.
+
+### Cómo está armado
+
+```
+src/
+├── caracteristicas.py   las variables de intensidad; las comparten entrenamiento y API
+├── entrenar.py          reconstruye el dataset, mide, reentrena y guarda el artefacto
+├── model.py             carga el modelo y predice; nada de HTTP
+└── app.py               FastAPI; nada de modelo
+models/
+├── modelo.joblib        el Random Forest entrenado (3,7 MB)
+└── metadata.json        ficha: fecha, pozos, métricas, operadoras, versiones
+```
+
+**`src/entrenar.py` hace dos cosas y la diferencia importa.** Primero entrena con los 1.298
+pozos fracturados hasta 2023 y mide una sola vez sobre los 619 de 2024-2025: de ahí salen las
+métricas que la API declara, y reproduce exactamente los números del notebook (MAE 10.596 m³,
+R² 0,263). Después **reentrena con los 1.917 pozos** para servir, porque un modelo que va a
+estimar pozos nuevos no tiene por qué ignorar los dos últimos años. `metadata.json` deja
+constancia de las dos cosas.
+
+### Despliegue
+
+Con Docker:
+
+```bash
+docker build -t pozos-api .
+docker run -p 8000:8000 pozos-api
+```
+
+En **Render** o **Hugging Face Spaces**, conectando el repositorio: el `Dockerfile` ya define
+todo. Si `models/` no estuviera, la imagen entrena el modelo durante la construcción.
+
+## Uso responsable del modelo
+
+La consigna pide una reflexión sobre sesgos e IA responsable, y acá va la nuestra, que es la
+misma que atraviesa todo el proyecto: **el riesgo de este modelo no es que se equivoque, es
+que se le crea más de lo que vale.**
+
+**Qué puede hacer.** Ordenar decisiones de diseño por cuánto rinden, comparar carteras de
+pozos y dar un orden de magnitud. Explica el 26% de la variabilidad.
+
+**Qué no puede hacer, y no habría que dejarlo hacer:**
+
+- **Decidir sobre un pozo individual.** El error se triplica en los extremos: sobreestima el
+  quintil menos productivo en 13.053 m³ y subestima el más productivo en 11.461. Justo en los
+  casos donde más plata hay en juego es donde peor anda.
+- **Comparar operadoras.** La variable `operadora` pesa tanto como la mejor variable de
+  diseño, pero mide **la calidad del área que cada empresa tiene en concesión**, no su
+  habilidad. Usarla para rankear empresas sería leer geología como desempeño. Es el sesgo más
+  peligroso del modelo porque es el más fácil de cometer.
+- **Sostener una decisión causal.** Solo existen los pozos que se perforaron: no hay
+  contrafactual. El modelo describe asociaciones.
+- **Aplicarse fuera de su alcance.** Está entrenado con pozos horizontales de rama ≥ 500 m,
+  en su enorme mayoría de Vaca Muerta y con el petróleo como objetivo. Un pozo vertical, de
+  gas o de otra formación cae fuera, y la API no tiene cómo saberlo.
+
+**Sesgos de los datos que el modelo hereda.** YPF representa el 53% de los pozos, así que el
+modelo aprende sobre todo su forma de completar. El 97% son de Vaca Muerta. Y los datos son
+los que las operadoras **declaran** al organismo: el modelo hereda cualquier sesgo sistemático
+de esa declaración, que no podemos auditar.
+
+**Qué hicimos al respecto.** El modelo se validó con pozos posteriores a los de entrenamiento,
+que es el uso real; la API devuelve un rango y no solo un número; `metadata.json` deja a la
+vista con qué se entrenó y cuándo; y las limitaciones están escritas en el README, en los
+notebooks y en la descripción de la propia API, no en una nota al pie. Un modelo que se
+presenta con sus límites adelante es más difícil de usar mal.
+
+**Validez temporal.** Está validado sobre pozos de 2024-2025. El diseño de completación cambia
+año a año —es el hallazgo central del proyecto— así que **esto se degrada con el tiempo**:
+hay que reentrenar y volver a medir con la partición temporal, no asumir que sigue valiendo.
 
 ## Uso de herramientas de IA
 
