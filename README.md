@@ -84,6 +84,7 @@ entrega-final-data-science/
 ├── docs/
 │   ├── DESPLIEGUE.md                 # cómo poner la API en un servidor público
 │   ├── space_README.md               # README listo para Hugging Face Spaces
+│   ├── guion_demo.md                 # la demostración en vivo, paso a paso
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
 │   ├── presentacion.pdf              # 17 diapositivas con las que se presenta el trabajo
 │   └── presentacion.pptx             # las mismas diapositivas, con las notas del orador
@@ -662,6 +663,9 @@ sí, porque es la que serializó el modelo.
 
 📄 **[Guía de despliegue paso a paso](docs/DESPLIEGUE.md)** — Render, Hugging Face Spaces y
 Docker, con qué revisar cuando algo falla.
+
+🎬 **[Guion de la demostración en vivo](docs/guion_demo.md)** — los tres pozos que se le
+piden al servicio, con los números que devuelve, para mostrar la API sin improvisar.
 
 ## Uso responsable del modelo
 
