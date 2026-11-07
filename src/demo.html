@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productividad de pozos · panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --fondo: #0A1F3A;
+    --panel: #112B4C;
+    --caja: #1B3A61;
+    --cian: #00B5CC;
+    --cian-claro: #7FD9E6;
+    --verde: #00697A;
+    --texto: #FFFFFF;
+    --texto-2: #C5D3E2;
+    --texto-3: #8CA3BD;
+    --aviso: #E8C87A;
+    --titulos: 'Archivo', 'Arial Narrow', Arial, sans-serif;
+    --cuerpo: 'IBM Plex Sans', 'Segoe UI', Verdana, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--fondo); color: var(--texto);
+    font-family: var(--cuerpo); font-size: 15px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    border-top: 6px solid var(--cian); background: var(--panel);
+    padding: 20px 24px; display: flex; flex-wrap: wrap;
+    align-items: baseline; gap: 8px 20px;
+  }
+  header h1 {
+    margin: 0; font-family: var(--titulos); font-size: 24px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: -0.2px;
+  }
+  header p { margin: 0; color: var(--texto-3); font-size: 14px; }
+  header a { margin-left: auto; color: var(--cian-claro); font-size: 14px; }
+
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 24px;
+    display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 24px; align-items: start;
+  }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 16px; } }
+
+  .tarjeta { background: var(--panel); border-radius: 8px; padding: 20px; }
+  h2 {
+    margin: 0 0 14px; font-family: var(--titulos); font-size: 13px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--cian-claro);
+  }
+  h2:not(:first-child) { margin-top: 26px; }
+
+  .presets { display: flex; gap: 8px; }
+  .presets button {
+    flex: 1; padding: 9px 4px; border: 1px solid #2F5680; border-radius: 6px;
+    background: var(--caja); color: var(--texto-2); font-family: var(--cuerpo);
+    font-size: 13px; cursor: pointer;
+  }
+  .presets button:hover { border-color: var(--cian); color: var(--texto); }
+  .presets button[aria-pressed="true"] {
+    background: var(--verde); border-color: var(--cian); color: var(--texto); font-weight: 600;
+  }
+
+  .campo { margin-top: 16px; }
+  .campo > label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 10px; font-size: 13px; color: var(--texto-2); margin-bottom: 6px;
+  }
+  .campo output { font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; }
+  input[type="range"] {
+    width: 100%; margin: 0; accent-color: var(--cian);
+    -webkit-appearance: none; appearance: none; background: transparent; height: 20px;
+  }
+  /* Separados a proposito: si un selector agrupa un pseudo-elemento que el navegador no
+     conoce, descarta la regla entera y el deslizador se queda sin pista. */
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px; border-radius: 3px; background: #22436B;
+  }
+  input[type="range"]::-moz-range-track {
+    height: 6px; border-radius: 3px; background: #22436B;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 18px; height: 18px; margin-top: -6px;
+    border-radius: 50%; background: var(--cian); border: none; cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--cian);
+    border: none; cursor: pointer;
+  }
+  select {
+    width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #2F5680;
+    background: var(--caja); color: var(--texto); font-family: var(--cuerpo); font-size: 14px;
+  }
+  .check { display: flex; gap: 9px; align-items: flex-start; margin-top: 16px; font-size: 13px;
+           color: var(--texto-2); }
+  .check input { accent-color: var(--cian); margin: 3px 0 0; flex: none; }
+
+  .numerote { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+  .numerote strong {
+    font-family: var(--titulos); font-size: 54px; font-weight: 700; line-height: 1;
+    color: var(--cian-claro); font-variant-numeric: tabular-nums;
+  }
+  .numerote span { color: var(--texto-3); font-size: 14px; }
+  .banda { color: var(--texto-2); font-size: 14px; margin: 10px 0 0; }
+
+  svg { display: block; width: 100%; height: auto; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px;
+             color: var(--texto-2); margin-top: 10px; }
+  .leyenda i { display: inline-block; width: 22px; height: 10px; border-radius: 2px;
+               margin-right: 7px; vertical-align: -1px; outline: 1px solid #2F5680; }
+
+  ul.avisos { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.avisos li {
+    background: var(--caja); border-left: 5px solid var(--aviso); border-radius: 0 6px 6px 0;
+    padding: 12px 14px; font-size: 14px; color: var(--texto-2);
+  }
+  ul.avisos li.extrapolacion { border-left-color: #E8905A; }
+  ul.avisos li b { color: var(--texto); font-family: var(--titulos);
+                   text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+  .sinavisos { color: var(--texto-3); font-size: 14px; margin: 0; }
+
+  details { margin-top: 20px; font-size: 14px; color: var(--texto-2); }
+  summary { cursor: pointer; color: var(--cian-claro); }
+  details table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  details td { padding: 5px 0; border-bottom: 1px solid #1E3C62; }
+  details td:last-child { text-align: right; font-variant-numeric: tabular-nums;
+                          color: var(--texto); }
+
+  .estado { color: var(--texto-3); font-size: 14px; margin: 12px 0 0; min-height: 20px; }
+  .estado.error { color: #FFB4A2; }
+  footer { max-width: 1280px; margin: 0 auto; padding: 0 24px 40px;
+           color: var(--texto-3); font-size: 13px; }
+  footer a { color: var(--cian-claro); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>El modelo, funcionando</h1>
+  <p>Productividad de pozos no convencionales en Vaca Muerta</p>
+  <a href="/docs">Documentación de la API →</a>
+</header>
+
+<main>
+  <section class="tarjeta">
+    <h2>Pozos de ejemplo</h2>
+    <div class="presets" id="presets"></div>
+
+    <h2>El diseño</h2>
+    <div class="campo">
+      <label for="rama">Longitud de rama <output id="o-rama"></output></label>
+      <input type="range" id="rama" min="500" max="6500" step="50">
+    </div>
+    <div class="campo">
+      <label for="etapas">Etapas de fractura <output id="o-etapas"></output></label>
+      <input type="range" id="etapas" min="5" max="120" step="1">
+    </div>
+    <div class="campo">
+      <label for="arena">Arena nacional <output id="o-arena"></output></label>
+      <input type="range" id="arena" min="0" max="25000" step="1">
+    </div>
+    <div class="campo">
+      <label for="agua">Agua inyectada <output id="o-agua"></output></label>
+      <input type="range" id="agua" min="0" max="150000" step="1">
+    </div>
+    <div class="campo">
+      <label for="operadora">Operadora</label>
+      <select id="operadora"></select>
+    </div>
+    <label class="check">
+      <input type="checkbox" id="intensidad" checked>
+      <span>Al mover la rama, escalar etapas, arena y agua en proporción, para que el diseño
+      por metro no cambie</span>
+    </label>
+
+    <h2>Qué barrer</h2>
+    <div class="presets" id="ejes">
+      <button type="button" data-eje="longitud_rama_horizontal_m">Rama</button>
+      <button type="button" data-eje="cantidad_fracturas">Etapas</button>
+    </div>
+
+    <p class="estado" id="estado"></p>
+  </section>
+
+  <section>
+    <div class="tarjeta">
+      <h2>Producción estimada · primeros 12 meses</h2>
+      <p class="numerote"><strong id="prediccion">—</strong> <span>m³ de petróleo</span></p>
+      <p class="banda" id="banda"></p>
+
+      <h2 id="titulo-grafico">Cómo responde al diseño</h2>
+      <svg id="grafico" viewBox="0 0 820 370" role="img" aria-labelledby="titulo-grafico"></svg>
+      <div class="leyenda">
+        <span><i style="background:#7FD9E6"></i>Estimación</span>
+        <span><i style="background:rgba(127,217,230,.26)"></i>Banda p10–p90 (voto de los 600 árboles)</span>
+        <span><i style="background:rgba(232,200,122,.16)"></i>1% extremo del entrenamiento</span>
+        <span><i style="background:rgba(232,144,90,.24)"></i>Fuera de lo que el modelo vio</span>
+      </div>
+
+      <details id="detalle">
+        <summary>Variables que ve el modelo (las calcula el servicio, no se las mandamos)</summary>
+        <table id="derivadas"></table>
+      </details>
+    </div>
+
+    <div class="tarjeta" style="margin-top:20px">
+      <h2>Avisos</h2>
+      <div id="avisos"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Los números salen del mismo modelo que sirve <a href="/docs">la API</a>: esta página sólo
+  dibuja lo que devuelve <code>POST /barrido</code>. El modelo explica el 26% de la
+  variabilidad: sirve para comparar diseños, no para dictaminar sobre un pozo individual.
+</footer>
+
+<script>
+"use strict";
+
+const nf = new Intl.NumberFormat("es-AR");
+const nf1 = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 1 });
+
+const FIJAS = {
+  arena_bombeada_importada_tn: 0,
+  presion_maxima_psi: 11000,
+  potencia_equipos_fractura_hp: 25000,
+  duracion_fractura_dias: 40,
+};
+
+const PRESETS = {
+  "Pozo corto":  { longitud_rama_horizontal_m: 2000, cantidad_fracturas: 34,
+                   arena_bombeada_nacional_tn: 7786,  agua_inyectada_m3: 49571 },
+  "Pozo típico": { longitud_rama_horizontal_m: 2800, cantidad_fracturas: 48,
+                   arena_bombeada_nacional_tn: 10900, agua_inyectada_m3: 69400 },
+  "Pozo largo":  { longitud_rama_horizontal_m: 3600, cantidad_fracturas: 62,
+                   arena_bombeada_nacional_tn: 14014, agua_inyectada_m3: 89229 },
+};
+
+const TRAMOS = {
+  longitud_rama_horizontal_m: { desde: 700,  hasta: 6500, etiqueta: "Longitud de rama (m)" },
+  cantidad_fracturas:         { desde: 5,    hasta: 120,  etiqueta: "Etapas de fractura" },
+};
+
+const $ = (id) => document.getElementById(id);
+const DESLIZADORES = {
+  longitud_rama_horizontal_m: $("rama"),
+  cantidad_fracturas: $("etapas"),
+  arena_bombeada_nacional_tn: $("arena"),
+  agua_inyectada_m3: $("agua"),
+};
+const SALIDAS = {
+  longitud_rama_horizontal_m: [$("o-rama"), (v) => nf.format(v) + " m"],
+  cantidad_fracturas: [$("o-etapas"), (v) => nf.format(v)],
+  arena_bombeada_nacional_tn: [$("o-arena"), (v) => nf.format(v) + " t"],
+  agua_inyectada_m3: [$("o-agua"), (v) => nf.format(v) + " m³"],
+};
+
+let eje = "longitud_rama_horizontal_m";
+// Referencia desde la que se escala al mover la rama: evita que el redondeo se acumule
+// arrastre tras arrastre. Se actualiza al elegir un preset o al mover otro deslizador.
+let referencia = { ...PRESETS["Pozo típico"] };
+let pedidoEnVuelo = 0;
+
+function diseñoActual() {
+  const d = { ...FIJAS, operadora: $("operadora").value || "ypf s.a." };
+  for (const [campo, input] of Object.entries(DESLIZADORES)) d[campo] = Number(input.value);
+  return d;
+}
+
+function aplicar(valores) {
+  for (const [campo, input] of Object.entries(DESLIZADORES)) {
+    if (valores[campo] !== undefined) input.value = valores[campo];
+  }
+  mostrarValores();
+}
+
+function mostrarValores() {
+  for (const [campo, [salida, formato]] of Object.entries(SALIDAS)) {
+    salida.textContent = formato(Number(DESLIZADORES[campo].value));
+  }
+}
+
+function escalarConLaRama() {
+  const k = Number(DESLIZADORES.longitud_rama_horizontal_m.value)
+          / referencia.longitud_rama_horizontal_m;
+  DESLIZADORES.cantidad_fracturas.value =
+    Math.max(1, Math.round(referencia.cantidad_fracturas * k));
+  DESLIZADORES.arena_bombeada_nacional_tn.value =
+    Math.round(referencia.arena_bombeada_nacional_tn * k);
+  DESLIZADORES.agua_inyectada_m3.value = Math.round(referencia.agua_inyectada_m3 * k);
+}
+
+// --------------------------------------------------------------------------- //
+// El gráfico
+// --------------------------------------------------------------------------- //
+
+const ANCHO = 820, ALTO = 370, M = { arriba: 14, derecha: 16, abajo: 44, izquierda: 96 };
+const esc = (v, d0, d1, r0, r1) => r0 + (v - d0) / (d1 - d0 || 1) * (r1 - r0);
+
+function bonito(max) {                     // un tope redondo para el eje vertical
+  const paso = Math.pow(10, Math.floor(Math.log10(max))) / 2;
+  return Math.ceil(max / paso) * paso;
+}
+
+function dibujar(datos) {
+  const curva = datos.curva;
+  const x0 = M.izquierda, x1 = ANCHO - M.derecha;
+  const y0 = ALTO - M.abajo, y1 = M.arriba;
+  const vx0 = curva[0].valor, vx1 = curva[curva.length - 1].valor;
+  const techo = bonito(Math.max(...curva.map((p) => p.p90)));
+  const X = (v) => esc(v, vx0, vx1, x0, x1);
+  const Y = (v) => esc(v, 0, techo, y0, y1);
+
+  const partes = [];
+
+  // Franjas de los tramos con aviso, detrás de todo.
+  let i = 0;
+  while (i < curva.length) {
+    const nivel = curva[i].nivel_eje;
+    let j = i;
+    while (j + 1 < curva.length && curva[j + 1].nivel_eje === nivel) j++;
+    if (nivel) {
+      const a = i === 0 ? x0 : X((curva[i - 1].valor + curva[i].valor) / 2);
+      const b = j === curva.length - 1 ? x1 : X((curva[j].valor + curva[j + 1].valor) / 2);
+      const color = nivel === "extrapolacion" ? "rgba(232,144,90,.24)" : "rgba(232,200,122,.16)";
+      partes.push(`<rect x="${a.toFixed(1)}" y="${y1}" width="${(b - a).toFixed(1)}"`
+                + ` height="${y0 - y1}" fill="${color}"></rect>`);
+      if (nivel === "extrapolacion" && i > 0) {
+        partes.push(`<line x1="${a.toFixed(1)}" y1="${y1}" x2="${a.toFixed(1)}" y2="${y0}"`
+                  + ` stroke="#E8905A" stroke-width="2" stroke-dasharray="5 4"></line>`);
+        // Si la franja arranca muy a la derecha, el rotulo se sale: va del otro lado.
+        const cabe = a + 190 < x1;
+        partes.push(`<text x="${(cabe ? a + 8 : a - 8).toFixed(1)}" y="${y1 + 18}"`
+                  + ` fill="#E8905A" font-size="13"`
+                  + ` text-anchor="${cabe ? "start" : "end"}">el modelo no vio pozos así</text>`);
+      }
+    }
+    i = j + 1;
+  }
+
+  // Grilla y eje vertical.
+  for (let k = 0; k <= 4; k++) {
+    const v = techo * k / 4, y = Y(v).toFixed(1);
+    partes.push(`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#23456E"`
+              + ` stroke-width="1"></line>`);
+    partes.push(`<text x="${x0 - 10}" y="${y}" fill="#8CA3BD" font-size="13"`
+              + ` text-anchor="end" dominant-baseline="middle">${nf.format(v)}</text>`);
+  }
+  partes.push(`<text x="18" y="${(y0 + y1) / 2}" fill="#8CA3BD" font-size="13"`
+            + ` text-anchor="middle" transform="rotate(-90 18 ${(y0 + y1) / 2})">m³</text>`);
+
+  // Eje horizontal.
+  for (let k = 0; k <= 5; k++) {
+    const v = vx0 + (vx1 - vx0) * k / 5;
+    partes.push(`<text x="${X(v).toFixed(1)}" y="${y0 + 22}" fill="#8CA3BD" font-size="13"`
+              + ` text-anchor="middle">${nf.format(Math.round(v))}</text>`);
+  }
+  partes.push(`<text x="${(x0 + x1) / 2}" y="${ALTO - 8}" fill="#8CA3BD" font-size="13"`
+            + ` text-anchor="middle">${TRAMOS[datos.variable].etiqueta}</text>`);
+
+  // Banda p10–p90 y línea central.
+  const arriba = curva.map((p) => `${X(p.valor).toFixed(1)},${Y(p.p90).toFixed(1)}`);
+  const abajo = curva.map((p) => `${X(p.valor).toFixed(1)},${Y(p.p10).toFixed(1)}`).reverse();
+  partes.push(`<polygon points="${arriba.concat(abajo).join(" ")}"`
+            + ` fill="rgba(127,217,230,.26)"></polygon>`);
+  partes.push(`<polyline points="${curva.map((p) => `${X(p.valor).toFixed(1)},`
+            + `${Y(p.prediccion_m3).toFixed(1)}`).join(" ")}" fill="none" stroke="#7FD9E6"`
+            + ` stroke-width="3" stroke-linejoin="round"></polyline>`);
+
+  // El pozo que está sobre la mesa.
+  const aqui = Number(DESLIZADORES[datos.variable].value);
+  if (aqui >= vx0 && aqui <= vx1) {
+    const px = X(aqui), py = Y(datos.actual.prediccion_m3);
+    partes.push(`<line x1="${px.toFixed(1)}" y1="${y0}" x2="${px.toFixed(1)}"`
+              + ` y2="${py.toFixed(1)}" stroke="#FFFFFF" stroke-width="1.5"`
+              + ` stroke-dasharray="4 4" opacity=".7"></line>`);
+    partes.push(`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="7" fill="#FFFFFF"`
+              + ` stroke="#0A1F3A" stroke-width="3"></circle>`);
+  }
+
+  $("grafico").innerHTML = partes.join("");
+}
+
+// --------------------------------------------------------------------------- //
+// Pedir y pintar
+// --------------------------------------------------------------------------- //
+
+function pintar(datos) {
+  const a = datos.actual;
+  $("prediccion").textContent = nf.format(Math.round(a.prediccion_m3));
+  $("banda").textContent =
+    `Entre ${nf.format(Math.round(a.rango_p10_p90_m3[0]))} y `
+    + `${nf.format(Math.round(a.rango_p10_p90_m3[1]))} m³ según el voto de los 600 árboles. `
+    + `El modelo no da una cifra sola.`;
+
+  const tabla = $("derivadas");
+  tabla.innerHTML = "";
+  for (const [k, v] of Object.entries(a.variables_derivadas)) {
+    const fila = tabla.insertRow();
+    fila.insertCell().textContent = k;
+    fila.insertCell().textContent = nf1.format(v);
+  }
+
+  const caja = $("avisos");
+  caja.innerHTML = "";
+  if (!a.avisos.length) {
+    const p = document.createElement("p");
+    p.className = "sinavisos";
+    p.textContent = "Ninguno: este pozo está dentro del rango con el que se entrenó el modelo.";
+    caja.appendChild(p);
+  } else {
+    const lista = document.createElement("ul");
+    lista.className = "avisos";
+    for (const av of a.avisos) {
+      const li = document.createElement("li");
+      li.className = av.nivel;
+      const b = document.createElement("b");
+      b.textContent = av.nivel === "extrapolacion" ? "Fuera de rango" : "Poca evidencia";
+      li.append(b, document.createElement("br"), av.mensaje);
+      lista.appendChild(li);
+    }
+    caja.appendChild(lista);
+  }
+
+  dibujar(datos);
+}
+
+let temporizador = null;
+function pedir({ inmediato = false } = {}) {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(async () => {
+    const mio = ++pedidoEnVuelo;
+    const estado = $("estado");
+    const lento = setTimeout(() => {
+      estado.textContent = "Despertando el servicio… la primera consulta puede tardar un minuto.";
+    }, 1200);
+    try {
+      const r = await fetch("/barrido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          diseno: diseñoActual(),
+          variable: eje,
+          desde: TRAMOS[eje].desde,
+          hasta: TRAMOS[eje].hasta,
+          puntos: 41,
+          mantener_intensidad: $("intensidad").checked,
+        }),
+      });
+      if (!r.ok) throw new Error(`el servicio respondió ${r.status}`);
+      const datos = await r.json();
+      if (mio !== pedidoEnVuelo) return;         // llegó tarde: ya hay uno más nuevo
+      estado.className = "estado";
+      estado.textContent = "";
+      pintar(datos);
+    } catch (e) {
+      if (mio !== pedidoEnVuelo) return;
+      estado.className = "estado error";
+      estado.textContent = `No se pudo consultar el modelo: ${e.message}`;
+    } finally {
+      clearTimeout(lento);
+    }
+  }, inmediato ? 0 : 180);
+}
+
+// --------------------------------------------------------------------------- //
+// Controles
+// --------------------------------------------------------------------------- //
+
+for (const [nombre, valores] of Object.entries(PRESETS)) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.textContent = nombre;
+  b.onclick = () => {
+    referencia = { ...valores };
+    aplicar(valores);
+    marcar("#presets", b);
+    pedir({ inmediato: true });
+  };
+  $("presets").appendChild(b);
+}
+
+function marcar(selector, elegido) {
+  for (const b of document.querySelectorAll(`${selector} button`)) {
+    b.setAttribute("aria-pressed", String(b === elegido));
+  }
+}
+
+for (const b of document.querySelectorAll("#ejes button")) {
+  b.onclick = () => { eje = b.dataset.eje; marcar("#ejes", b); pedir({ inmediato: true }); };
+}
+
+DESLIZADORES.longitud_rama_horizontal_m.addEventListener("input", () => {
+  if ($("intensidad").checked) escalarConLaRama();
+  mostrarValores();
+  marcar("#presets", null);
+  pedir();
+});
+for (const campo of ["cantidad_fracturas", "arena_bombeada_nacional_tn", "agua_inyectada_m3"]) {
+  DESLIZADORES[campo].addEventListener("input", () => {
+    referencia = { ...referencia, ...diseñoActual() };   // nueva base para escalar
+    mostrarValores();
+    marcar("#presets", null);
+    pedir();
+  });
+}
+$("intensidad").addEventListener("change", () => {
+  referencia = { ...referencia, ...diseñoActual() };
+  pedir({ inmediato: true });
+});
+$("operadora").addEventListener("change", () => pedir({ inmediato: true }));
+
+// --------------------------------------------------------------------------- //
+// Arranque
+// --------------------------------------------------------------------------- //
+
+(async () => {
+  aplicar(PRESETS["Pozo típico"]);
+  marcar("#presets", $("presets").children[1]);
+  marcar("#ejes", document.querySelector("#ejes button"));
+  try {
+    const r = await fetch("/operadoras");
+    const { operadoras_conocidas } = await r.json();
+    for (const o of operadoras_conocidas) {
+      const op = document.createElement("option");
+      op.value = o;
+      op.textContent = o;
+      $("operadora").appendChild(op);
+    }
+    $("operadora").value = "ypf s.a.";
+  } catch (e) {
+    const op = document.createElement("option");
+    op.value = "ypf s.a.";
+    op.textContent = "ypf s.a.";
+    $("operadora").appendChild(op);
+  }
+  pedir({ inmediato: true });
+})();
+</script>
+</body>
+</html>

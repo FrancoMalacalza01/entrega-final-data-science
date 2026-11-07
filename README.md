@@ -9,11 +9,15 @@ entre los tres; nos apoyamos en herramientas de IA como copiloto, y lo documenta
 de este README.
 
 **El modelo está desplegado y se puede probar ahora mismo:**
-**<https://entregafinal-data-science.onrender.com/docs>** — se le pasa el diseño de un pozo
-(metros de rama, etapas, arena, agua) y devuelve la producción estimada a doce meses. Corre en
-una capa gratuita que duerme el servicio tras quince minutos sin uso, así que la primera
-petición puede tardar hasta un minuto; las siguientes son inmediatas. El detalle está en
-[La API de predicción](#la-api-de-predicción).
+
+- **<https://entregafinal-data-science.onrender.com/demo>** — un panel para mover el diseño
+  del pozo con deslizadores y ver cómo responde el modelo.
+- **<https://entregafinal-data-science.onrender.com/docs>** — la API, con su documentación
+  interactiva.
+
+Corre en una capa gratuita que duerme el servicio tras quince minutos sin uso, así que la
+primera petición puede tardar hasta un minuto; las siguientes son inmediatas. El detalle está
+en [La API de predicción](#la-api-de-predicción).
 
 ## El problema
 
@@ -99,7 +103,8 @@ entrega-final-data-science/
 │   ├── caracteristicas.py            # variables de intensidad: entrenamiento y API
 │   ├── entrenar.py                   # entrena y guarda el modelo
 │   ├── model.py                      # carga el modelo y predice
-│   └── app.py                        # la API FastAPI
+│   ├── app.py                        # la API FastAPI
+│   └── demo.html                     # el panel interactivo que sirve /demo
 └── notebooks/
     ├── 01_eda_preentrega2.ipynb         # análisis exploratorio y limpieza
     ├── 02_modelado_preentrega3.ipynb    # regresión: cuántos m³ produce un pozo
@@ -555,7 +560,7 @@ uvicorn src.app:app --reload    # levanta el servicio
 Y en el navegador, **http://127.0.0.1:8000/docs**: la documentación interactiva que genera
 FastAPI, donde se puede probar el endpoint sin escribir una línea de código.
 
-### Los cinco endpoints
+### Los endpoints
 
 | Método | Ruta | Para qué |
 |---|---|---|
@@ -564,6 +569,8 @@ FastAPI, donde se puede probar el endpoint sin escribir una línea de código.
 | `GET` | `/modelo` | Cuándo se entrenó, con cuántos pozos, con qué métricas y con qué rangos |
 | `GET` | `/operadoras` | Las operadoras que el modelo conoce |
 | `POST` | `/predict` | La estimación |
+| `POST` | `/barrido` | La curva de la estimación a lo largo de una variable |
+| `GET` | `/demo` | El panel interactivo |
 
 ### Un ejemplo
 
@@ -661,6 +668,31 @@ Las dos palancas del modelo se ven pidiéndole estimaciones y cambiando una sola
 La primera tabla sube con fuerza y la segunda se aplana: es, en estimaciones concretas, el
 mismo resultado que los coeficientes del punto 20.
 
+### El panel
+
+**[`/demo`](https://entregafinal-data-science.onrender.com/demo)** es una página suelta que
+sirve esta misma aplicación: se mueve el diseño con deslizadores y el modelo responde al
+instante. No es una segunda aplicación ni agrega dependencias —`src/demo.html` es un archivo
+que `app.py` devuelve tal cual—, así que hay un solo servicio que desplegar y mantener.
+
+Dibuja la **curva de sensibilidad**: barre la longitud de rama (o la cantidad de etapas) y
+muestra, a lo largo de todo el recorrido, la estimación, la banda p10–p90 y **el tramo donde
+el modelo se queda sin datos**. Con eso se ven de un vistazo las tres cosas que importan: cuál
+es la palanca, cuánta incertidumbre hay, y dónde deja de valer.
+
+Esa curva la calcula **`POST /barrido`**, y está pensado para que el deslizador se pueda mover
+en vivo: las 41 filas se arman y se pasan al modelo **en un solo lote**.
+
+| Cómo se piden los 41 puntos | Tiempo |
+|---|---:|
+| Uno por uno | 4.653 ms |
+| En un lote, con banda y punto actual | **139 ms** |
+
+El `ColumnTransformer` y los 600 árboles vectorizan sobre las filas, así que la curva entera
+cuesta menos que pedir una sola estimación suelta por cada punto. El punto que corresponde al
+diseño actual viaja como una fila más del mismo lote, de modo que **el número del gráfico y el
+de `/predict` no pueden diferir**: los produce la misma pasada.
+
 ### Cómo está armado
 
 ```
@@ -668,7 +700,8 @@ src/
 ├── caracteristicas.py   las variables de intensidad; las comparten entrenamiento y API
 ├── entrenar.py          reconstruye el dataset, mide, reentrena y guarda el artefacto
 ├── model.py             carga el modelo y predice; nada de HTTP
-└── app.py               FastAPI; nada de modelo
+├── app.py               FastAPI; nada de modelo
+└── demo.html            el panel; pide los datos a /barrido y dibuja
 models/
 ├── modelo.joblib        el Random Forest entrenado (3,7 MB)
 └── metadata.json        ficha: fecha, pozos, métricas, operadoras, rangos, versiones

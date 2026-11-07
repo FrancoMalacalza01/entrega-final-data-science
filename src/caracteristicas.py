@@ -79,9 +79,19 @@ def normalizar_operadora(nombre):
     return re.sub(r"\s+", " ", str(nombre).strip().lower())
 
 
-def fila_desde_diseno(diseno):
-    """Convierte el diseño de un pozo (un diccionario) en la fila que espera el modelo."""
-    d = pd.DataFrame([diseno])
+def filas_desde_disenos(disenos):
+    """Convierte varios diseños en las filas que espera el modelo, de una sola vez.
+
+    Construir un DataFrame por diseño y concatenarlos después cuesta unas diez veces más
+    que armar uno solo con todas las filas, y eso es lo que decide si una curva de
+    sensibilidad se puede dibujar en vivo o no.
+    """
+    d = pd.DataFrame(list(disenos))
     d = agregar_variables_intensidad(d)
     d["operadora"] = normalizar_operadora(d["operadora"])
     return d[NUMERICAS + CATEGORICAS]
+
+
+def fila_desde_diseno(diseno):
+    """Convierte el diseño de un pozo (un diccionario) en la fila que espera el modelo."""
+    return filas_desde_disenos([diseno])

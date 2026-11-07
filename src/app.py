@@ -11,11 +11,14 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field, model_validator
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src import model
+
+RUTA_DEMO = Path(__file__).resolve().parent / "demo.html"
 
 app = FastAPI(
     title="Productividad de pozos en Vaca Muerta",
@@ -82,6 +85,36 @@ class Respuesta(BaseModel):
                      "cayó en el 1% extremo."))
 
 
+class PedidoBarrido(BaseModel):
+    """Qué curva de sensibilidad dibujar: un diseño, una variable y un tramo."""
+
+    diseno: Diseno
+    variable: str = Field(
+        "longitud_rama_horizontal_m",
+        description="Qué variable barrer: longitud_rama_horizontal_m o cantidad_fracturas",
+        examples=["longitud_rama_horizontal_m"])
+    desde: float | None = Field(
+        None, description="Dónde empieza el barrido. Por defecto, el mínimo del entrenamiento")
+    hasta: float | None = Field(
+        None, description="Dónde termina. Por defecto, el máximo del entrenamiento")
+    puntos: int = Field(41, ge=2, le=120, description="Cuántos puntos tiene la curva")
+    mantener_intensidad: bool = Field(
+        True,
+        description=("Al mover la rama, escalar también etapas, arena y agua, de modo que el "
+                     "diseño por metro no cambie. Sin esto, alargar el pozo lo diluye y la "
+                     "curva baja: es correcto, pero responde otra pregunta. No aplica a las "
+                     "demás variables."))
+
+    @model_validator(mode="after")
+    def _tramo_valido(self):
+        if self.variable not in ("longitud_rama_horizontal_m", "cantidad_fracturas"):
+            raise ValueError("variable tiene que ser longitud_rama_horizontal_m "
+                             "o cantidad_fracturas")
+        if self.desde is not None and self.hasta is not None and self.hasta <= self.desde:
+            raise ValueError("hasta tiene que ser mayor que desde")
+        return self
+
+
 @app.get("/", tags=["info"])
 def raiz():
     """Ficha del servicio."""
@@ -91,7 +124,9 @@ def raiz():
         "documentacion": "/docs",
         "endpoints": {"POST /predict": "estimar un pozo", "GET /health": "estado",
                       "GET /modelo": "ficha del modelo",
-                      "GET /operadoras": "las operadoras que el modelo conoce"},
+                      "GET /operadoras": "las operadoras que el modelo conoce",
+                      "POST /barrido": "la curva de la estimacion a lo largo de una variable",
+                      "GET /demo": "panel interactivo"},
     }
 
 
@@ -146,3 +181,39 @@ def predict(diseno: Diseno):
         raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"No se pudo predecir: {e}")
+
+
+@app.post("/barrido", tags=["prediccion"])
+def barrido(pedido: PedidoBarrido):
+    """La curva de la estimación a lo largo de una variable, con su banda y sus avisos.
+
+    Es lo que alimenta el panel de `/demo`. Las filas se arman y se pasan al modelo en un
+    solo lote, así que una curva de 41 puntos cuesta más o menos lo mismo que una sola
+    estimación pedida de a una, y el deslizador se puede mover en vivo.
+
+    Cada punto trae `nivel_aviso`, que permite marcar en el gráfico el tramo donde el
+    modelo se queda sin datos.
+    """
+    try:
+        return model.barrido(pedido.diseno.model_dump(), variable=pedido.variable,
+                             desde=pedido.desde, hasta=pedido.hasta, puntos=pedido.puntos,
+                             mantener_intensidad=pedido.mantener_intensidad)
+    except model.ModeloNoEntrenado as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo barrer: {e}")
+
+
+@app.get("/demo", response_class=HTMLResponse, include_in_schema=False)
+def demo():
+    """Un panel para mover el diseño y ver cómo responde el modelo.
+
+    Es una página suelta servida por esta misma aplicación: no agrega dependencias ni un
+    segundo despliegue que mantener. Todo lo que muestra sale de `/barrido`.
+    """
+    try:
+        return HTMLResponse(RUTA_DEMO.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="No se encontro src/demo.html")

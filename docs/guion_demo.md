@@ -3,13 +3,34 @@
 Para la diapositiva **«El modelo, funcionando»**. Está pensado para imprimirse y tenerlo
 al lado: todo lo que hay que pegar está acá, no hay que calcular nada delante de la clase.
 
-**Dirección:** <https://entregafinal-data-science.onrender.com/docs>
+**El panel:** <https://entregafinal-data-science.onrender.com/demo>
+**La API:** <https://entregafinal-data-science.onrender.com/docs>
+
+---
+
+## Dos caminos, y cuál conviene
+
+**Para mostrar en clase, el panel.** Se mueve un deslizador y el número cambia delante de
+todos, con la curva entera a la vista. No hay que pegar nada ni leer JSON, y la zona sombreada
+del gráfico cuenta sola el límite del modelo. Son los **pasos 1 y 2 en versión corta**:
+
+1. Abrir **`/demo`**. Arranca en el pozo típico: **38.506 m³**.
+2. Apretar **«Pozo corto»** (29.224) y **«Pozo largo»** (49.903). Tres clics, misma historia.
+3. Arrastrar el deslizador de **longitud de rama** hacia la derecha. La curva sube, y al pasar
+   los **4.965 metros** entra en la franja marcada: el número deja de moverse y aparecen los
+   avisos. Ahí se dice la frase que importa: *«el pozo más largo del entrenamiento mide 4.965
+   metros; de acá en más el modelo devuelve siempre lo mismo, porque un bosque no extrapola»*.
+4. Apretar **«Etapas»** en *Qué barrer*: la curva sube y se aplana. La segunda palanca.
+
+**Para mostrar que es una API de verdad, `/docs`.** Si el profesor pregunta por la
+implementación, o si querés mostrar la respuesta cruda, están los pasos completos más abajo.
+Sirven igual como respaldo: **si el panel no carga, la demostración sigue en `/docs`**.
 
 ---
 
 ## Antes de entrar al aula
 
-- [ ] **Diez minutos antes**, abrir la dirección en una pestaña y dejarla abierta. La capa
+- [ ] **Diez minutos antes**, abrir **las dos** direcciones en sendas pestañas y dejarlas abiertas. La capa
       gratuita de Render duerme el servicio tras quince minutos sin uso y la primera petición
       puede tardar casi un minuto. En vivo eso se ve como si nada funcionara.
 - [ ] Tener **este guion abierto o impreso**, para copiar y pegar sin pensar.
