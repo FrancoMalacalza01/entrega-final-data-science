@@ -125,6 +125,42 @@ las etapas por debajo de los 58 metros de espaciamiento es gastar sin contrapart
 
 ---
 
+## Paso 4 — Lo que el servicio avisa
+
+Dos comportamientos que conviene mostrar si hay tiempo, porque son la respuesta a lo que
+señaló la devolución del curso.
+
+### 4a. El pozo imposible
+
+Sobre el **pozo base**, cambiar `longitud_rama_horizontal_m` a **8.000** y ejecutar.
+
+Responde igual —**24.156 m³**— pero el campo `avisos` ya no viene vacío:
+
+> `longitud_rama_horizontal_m = 8.000,0 queda por encima de todo lo que el modelo vio al
+> entrenar (522,0 a 4.965,0). Un bosque no extrapola: a partir del borde devuelve siempre lo
+> mismo. La estimación no es confiable.`
+
+*«El pozo más largo del entrenamiento mide 4.965 metros. Si le pedimos 6.000 u 8.000, el
+modelo devuelve prácticamente el mismo número, porque un árbol de decisión no extrapola:
+guarda promedios de los pozos que vio. Antes lo estimaba en silencio; ahora lo dice.»*
+
+| Rama (con la intensidad en proporción) | Estimación | Aviso |
+|---|---:|---|
+| 4.000 m | 50.606 m³ | — |
+| 4.965 m | 54.980 m³ | `poca_evidencia` |
+| 6.000 m | 55.016 m³ | `extrapolacion` |
+| 8.000 m | 54.980 m³ | `extrapolacion` |
+
+### 4b. Las mayúsculas
+
+Escribir la operadora como **`YPF S.A.`** en vez de `ypf s.a.`. Devuelve lo mismo —38.506 m³—
+y en `operadora_normalizada` se ve `ypf s.a.`, la forma con la que buscó.
+
+*«El archivo de la Secretaría trae las razones sociales en minúsculas y nadie las escribe
+así. La normalización está en el mismo módulo que comparten el entrenamiento y la API.»*
+
+---
+
 ## Si la conexión falla
 
 **Seguir sin pedir disculpas.** Los números de la diapositiva son los reales, así que el
@@ -141,10 +177,11 @@ Dos campos se comportan de manera que no se explica bien en diez segundos:
   salto de «hay o no hay importada», probablemente asociado a la época y a qué operadoras la
   usaron, no un efecto de la arena en sí. Es coherente con que sea la variable menos importante
   del modelo, pero la demostración no lo muestra bien.
-- **`operadora`** con un nombre inventado. Funciona —devuelve 38.308 m³ y marca
-  `operadora_conocida: false`, que es la validación trabajando— pero invita a la pregunta de
+- **`operadora`** con un nombre inventado. Funciona bien —devuelve 38.308 m³, marca
+  `operadora_conocida: false` y agrega el aviso correspondiente— pero invita a la pregunta de
   por qué la operadora pesa tanto, y ésa merece la respuesta larga: **mide la calidad del área
-  en concesión, no la habilidad de la empresa.**
+  en concesión, no la habilidad de la empresa.** Si hay tiempo para una sola cosa extra,
+  mejor el paso 4a.
 
 ---
 

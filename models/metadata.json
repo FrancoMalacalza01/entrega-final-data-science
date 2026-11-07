@@ -27,6 +27,86 @@
     "vista oil & gas argentina sau",
     "ypf s.a."
   ],
+  "rangos_entrenamiento": {
+    "agua_inyectada_m3": {
+      "min": 297.85,
+      "max": 159319.63,
+      "p1": 8238.5664,
+      "p99": 116547.5074
+    },
+    "agua_por_metro": {
+      "min": 0.3423,
+      "max": 56.0253,
+      "p1": 5.5042,
+      "p99": 38.5594
+    },
+    "arena_bombeada_importada_tn": {
+      "min": 0.0,
+      "max": 80652.0,
+      "p1": 0.0,
+      "p99": 6387.24
+    },
+    "arena_bombeada_nacional_tn": {
+      "min": 0.0,
+      "max": 22643.0832,
+      "p1": 0.0,
+      "p99": 17300.516
+    },
+    "arena_por_metro": {
+      "min": 0.1105,
+      "max": 38.734,
+      "p1": 1.3592,
+      "p99": 5.6939
+    },
+    "cantidad_fracturas": {
+      "min": 1.0,
+      "max": 101.0,
+      "p1": 8.0,
+      "p99": 84.84
+    },
+    "duracion_fractura_dias": {
+      "min": 0.0,
+      "max": 1889.0,
+      "p1": 5.0,
+      "p99": 368.3
+    },
+    "espaciamiento_etapas_m": {
+      "min": 24.3243,
+      "max": 1123.4,
+      "p1": 38.5448,
+      "p99": 132.5873
+    },
+    "longitud_rama_horizontal_m": {
+      "min": 522.0,
+      "max": 4965.0,
+      "p1": 891.4264,
+      "p99": 4262.176
+    },
+    "potencia_equipos_fractura_hp": {
+      "min": 2000.0,
+      "max": 44000.0,
+      "p1": 2000.0,
+      "p99": 44000.0
+    },
+    "presion_maxima_psi": {
+      "min": 7160.0,
+      "max": 13841.0,
+      "p1": 9420.48,
+      "p99": 13370.52
+    },
+    "ratio_agua_arena": {
+      "min": 0.3016,
+      "max": 13.6166,
+      "p1": 2.7009,
+      "p99": 8.947
+    },
+    "ratio_arena_importada": {
+      "min": 0.0,
+      "max": 1.0,
+      "p1": 0.0,
+      "p99": 1.0
+    }
+  },
   "metricas_validacion_temporal": {
     "MAE": 10596.265610646116,
     "RMSE": 14828.979793159395,

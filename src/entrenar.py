@@ -32,8 +32,8 @@ from sklearn.preprocessing import OneHotEncoder
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.caracteristicas import (CATEGORICAS, NUMERICAS, OBJETIVO,
-                                 agregar_variables_intensidad)
+from src.caracteristicas import (CATEGORICAS, CRUDAS, NUMERICAS, OBJETIVO,
+                                 agregar_variables_intensidad, normalizar_operadora)
 from src.utils import agrupar_categorias, leer
 
 SEMILLA = 42
@@ -66,8 +66,7 @@ def construir_dataset():
     df.loc[df.fecha_inicio_fractura > fecha_corte, "fecha_inicio_fractura"] = pd.NaT
 
     for c in ["formacion_productiva", "empresa_informante"]:
-        df[c] = (df[c].astype(str).str.strip().str.lower()
-                 .replace({"nan": "sin dato", "": "sin dato"}))
+        df[c] = normalizar_operadora(df[c]).replace({"nan": "sin dato", "": "sin dato"})
 
     df = df[df.longitud_rama_horizontal_m >= UMBRAL_RAMA_M]
     pozos = df.groupby("idpozo").agg(**{k: (k, v) for k, v in AGREGACION.items()}).reset_index()
@@ -113,6 +112,25 @@ def construir_dataset():
 
     datos["operadora"] = agrupar_categorias(datos.empresa_informante)
     return datos
+
+
+def rangos_observados(datos):
+    """Hasta dónde llegan los datos con los que se entrenó, variable por variable.
+
+    La API los usa para avisar cuando un pozo cae afuera. Se guardan dos pares: el mínimo y
+    el máximo observados, que marcan el borde más allá del cual el modelo extrapola, y los
+    percentiles 1 y 99, que marcan dónde empieza el 1% extremo —ahí dentro hay datos, pero
+    tan pocos que la estimación se apoya en un puñado de pozos—.
+    """
+    rangos = {}
+    for c in sorted(set(NUMERICAS + CRUDAS)):
+        s = datos[c].dropna()
+        if s.empty:
+            continue
+        p1, p99 = s.quantile([0.01, 0.99])
+        rangos[c] = {"min": round(float(s.min()), 4), "max": round(float(s.max()), 4),
+                     "p1": round(float(p1), 4), "p99": round(float(p99), 4)}
+    return rangos
 
 
 def nuevo_modelo():
@@ -167,6 +185,7 @@ def main():
         "pozos_entrenamiento": int(len(datos)),
         "variables": columnas,
         "operadoras_conocidas": sorted(datos.operadora.unique().tolist()),
+        "rangos_entrenamiento": rangos_observados(datos),
         "metricas_validacion_temporal": metricas,
         "nota_metricas": (f"Medidas sobre un modelo entrenado solo con los {len(train):,} pozos "
                           f"fracturados hasta {CORTE - 1} y evaluado sobre los {len(test):,} de "

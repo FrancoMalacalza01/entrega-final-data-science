@@ -40,6 +40,12 @@ curl -X POST https://TU_USUARIO-pozos-vaca-muerta.hf.space/predict \
 Responde la estimación, un rango a partir del voto de los 600 árboles del bosque, y las
 variables de intensidad que el servicio calculó a partir del diseño.
 
+El nombre de la operadora **no distingue mayúsculas**, y la lista de las que el modelo conoce
+está en `/operadoras`. Cada respuesta trae además un campo **`avisos`** con los datos del
+pedido que caen fuera del rango de entrenamiento: un pozo de 8.000 metros de rama se estima
+igual, pero con el aviso de que el más largo que vio el modelo mide 4.965, y que a partir de
+ahí un bosque devuelve siempre lo mismo.
+
 ## Qué hay detrás
 
 Un **Random Forest** entrenado con **1.917 pozos** de petróleo de Vaca Muerta, con datos

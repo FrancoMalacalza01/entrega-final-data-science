@@ -555,13 +555,14 @@ uvicorn src.app:app --reload    # levanta el servicio
 Y en el navegador, **http://127.0.0.1:8000/docs**: la documentación interactiva que genera
 FastAPI, donde se puede probar el endpoint sin escribir una línea de código.
 
-### Los cuatro endpoints
+### Los cinco endpoints
 
 | Método | Ruta | Para qué |
 |---|---|---|
 | `GET` | `/` | Ficha del servicio |
 | `GET` | `/health` | Estado. Devuelve 503 si el modelo no está entrenado |
-| `GET` | `/modelo` | Cuándo se entrenó, con cuántos pozos, con qué métricas y qué operadoras conoce |
+| `GET` | `/modelo` | Cuándo se entrenó, con cuántos pozos, con qué métricas y con qué rangos |
+| `GET` | `/operadoras` | Las operadoras que el modelo conoce |
 | `POST` | `/predict` | La estimación |
 
 ### Un ejemplo
@@ -583,7 +584,9 @@ curl -X POST https://entregafinal-data-science.onrender.com/predict \
     "ratio_agua_arena": 6.367,
     "ratio_arena_importada": 0.0
   },
-  "operadora_conocida": true
+  "operadora_normalizada": "ypf s.a.",
+  "operadora_conocida": true,
+  "avisos": []
 }
 ```
 
@@ -603,7 +606,41 @@ porque el modelo comprime sus predicciones hacia el centro.
 
 Y marca si la **operadora es conocida**. Una que el modelo no vio al entrenar no rompe nada
 —el codificador la trata como todo ceros— pero la estimación pierde el aporte de esa
-variable, y conviene saberlo.
+variable, y conviene saberlo. El nombre **no distingue mayúsculas**: el archivo de la
+Secretaría trae las razones sociales en minúsculas y quien usa la API escribe «YPF S.A.»,
+así que el servicio normaliza antes de buscar y devuelve en `operadora_normalizada` la forma
+con la que efectivamente buscó. La lista completa está en `GET /operadoras`.
+
+### Los avisos: hasta dónde se le puede preguntar
+
+Cada respuesta trae un campo **`avisos`** con los datos del pedido que caen fuera del rango
+de entrenamiento. Está vacío cuando el pozo está dentro de lo que el modelo vio. Hay dos
+niveles, porque no es lo mismo pedirle algo raro que pedirle algo que nunca existió:
+
+- **`extrapolacion`** — el valor queda fuera del mínimo y el máximo observados. Un bosque de
+  decisión **no puede extrapolar**: sus hojas guardan promedios de los pozos que vio, así que
+  a partir del borde devuelve siempre lo mismo por más que se siga estirando el valor.
+- **`poca_evidencia`** — el valor cae dentro, pero en el 1% extremo. Hay datos, pero tan
+  pocos que la estimación se apoya en un puñado de pozos.
+
+Los rangos se calculan al entrenar y quedan en `metadata.json`, así que el aviso dice el
+número exacto y no una regla escrita a mano. El pozo más largo del entrenamiento mide
+**4.965 m**, y se ve con qué consecuencia:
+
+| Rama (con arena, agua y etapas en proporción) | Estimación | Aviso |
+|---|---|---|
+| 3.600 m | 49.903 m³ | — |
+| 4.000 m | 50.606 m³ | — |
+| 4.965 m | 54.980 m³ | `poca_evidencia` |
+| 6.000 m | 55.016 m³ | `extrapolacion` |
+| 8.000 m | 54.980 m³ | `extrapolacion` |
+
+Pasado el borde **la estimación se congela**: 6.000 y 8.000 metros devuelven prácticamente el
+mismo número. Sin el aviso, un pozo de 8.000 metros se estimaba en silencio y nada en la
+respuesta delataba que la cifra ya no significaba nada.
+
+La estimación se devuelve igual, no se rechaza el pedido. Un 422 diría «no» sin explicar por
+qué, y el usuario no se enteraría de cuál de los nueve datos es el problema.
 
 ### Lo que responde ante el diseño
 
@@ -634,7 +671,7 @@ src/
 └── app.py               FastAPI; nada de modelo
 models/
 ├── modelo.joblib        el Random Forest entrenado (3,7 MB)
-└── metadata.json        ficha: fecha, pozos, métricas, operadoras, versiones
+└── metadata.json        ficha: fecha, pozos, métricas, operadoras, rangos, versiones
 ```
 
 **`src/entrenar.py` hace dos cosas y la diferencia importa.** Primero entrena con los 1.298

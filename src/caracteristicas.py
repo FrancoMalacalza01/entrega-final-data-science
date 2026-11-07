@@ -9,6 +9,8 @@ predicción siguen el mismo camino. Si estas cinco fórmulas estuvieran escritas
 tarde o temprano se separarían.
 """
 
+import re
+
 import numpy as np
 import pandas as pd
 
@@ -59,8 +61,27 @@ def agregar_variables_intensidad(df):
     return d
 
 
+def normalizar_operadora(nombre):
+    """Lleva una razón social a la forma con la que se entrenó: minúsculas y un solo espacio.
+
+    El archivo de la Secretaría trae las razones sociales en mayúsculas y con separaciones
+    irregulares, así que el entrenamiento las baja a minúsculas antes de codificarlas. Quien
+    usa la API, en cambio, escribe «YPF S.A.», que es como se lee en cualquier lado. Sin esta
+    normalización el encoder no la reconoce, la codifica como una operadora nueva y la
+    estimación pierde el aporte de la variable sin que nadie se entere.
+
+    Acepta un valor suelto o una Serie, porque la usan los dos caminos: el entrenamiento
+    sobre la columna entera y la API sobre el pozo que llega en el pedido.
+    """
+    if isinstance(nombre, pd.Series):
+        return (nombre.astype(str).str.strip().str.lower()
+                .str.replace(r"\s+", " ", regex=True))
+    return re.sub(r"\s+", " ", str(nombre).strip().lower())
+
+
 def fila_desde_diseno(diseno):
     """Convierte el diseño de un pozo (un diccionario) en la fila que espera el modelo."""
     d = pd.DataFrame([diseno])
     d = agregar_variables_intensidad(d)
+    d["operadora"] = normalizar_operadora(d["operadora"])
     return d[NUMERICAS + CATEGORICAS]
