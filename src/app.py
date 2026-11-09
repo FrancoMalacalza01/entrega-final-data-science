@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, model_validator
 
@@ -19,6 +20,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from src import model
 
 RUTA_DEMO = Path(__file__).resolve().parent / "demo.html"
+RUTA_ESTILO_DOCS = Path(__file__).resolve().parent / "estilo_docs.html"
+
+CINTA_DOCS = """<div class="cinta-pozos"><div class="interior"><h1>Productividad de pozos en Vaca Muerta</h1><p>Proyecto final de Ciencia de Datos &middot; EnergIA Digital 2026</p><a href="/demo">Probarlo con deslizadores &#9654;</a></div></div>"""
 
 app = FastAPI(
     title="Productividad de pozos en Vaca Muerta",
@@ -35,6 +39,18 @@ app = FastAPI(
         "bosque no extrapola, así que a partir de ahí devuelve siempre lo mismo."
     ),
     version="1.0.0",
+    # La pagina de /docs la arma esta aplicacion, mas abajo, para poder vestirla.
+    docs_url=None,
+    swagger_ui_parameters={
+        # El bloque "Schemas" repite al pie lo que cada endpoint ya muestra desplegado.
+        "defaultModelsExpandDepth": -1,
+        # "Try it out" ya abierto: el visitante viene a probar, no a leer.
+        "tryItOutEnabled": True,
+        "displayRequestDuration": True,
+        "docExpansion": "list",
+        "defaultModelRendering": "example",
+        "syntaxHighlight": {"theme": "tomorrow-night"},
+    },
 )
 
 
@@ -65,6 +81,20 @@ class Diseno(BaseModel):
                      "la respuesta lo avisa."),
         examples=["YPF S.A."])
 
+    # Un pozo entero y coherente, para que «Try it out» arranque con algo real en vez de
+    # con el campo por campo que arma Swagger solo.
+    model_config = {"json_schema_extra": {"example": {
+        "longitud_rama_horizontal_m": 2800,
+        "cantidad_fracturas": 48,
+        "arena_bombeada_nacional_tn": 10900,
+        "arena_bombeada_importada_tn": 0,
+        "agua_inyectada_m3": 69400,
+        "presion_maxima_psi": 11000,
+        "potencia_equipos_fractura_hp": 25000,
+        "duracion_fractura_dias": 40,
+        "operadora": "YPF S.A.",
+    }}}
+
 
 class Respuesta(BaseModel):
     prediccion_m3: float = Field(..., description="m³ de petróleo estimados a 12 meses")
@@ -83,6 +113,20 @@ class Respuesta(BaseModel):
                      "la variable, su valor, el rango y un `nivel`: `extrapolacion` si "
                      "quedó fuera del mínimo y el máximo observados, `poca_evidencia` si "
                      "cayó en el 1% extremo."))
+
+    # La respuesta real del pozo de ejemplo, copiada del servicio.
+    model_config = {"json_schema_extra": {"example": {
+        "prediccion_m3": 38506.0,
+        "rango_p10_p90_m3": [26915.1, 49433.9],
+        "variables_derivadas": {
+            "arena_por_metro": 3.893, "agua_por_metro": 24.786,
+            "espaciamiento_etapas_m": 58.333, "ratio_agua_arena": 6.367,
+            "ratio_arena_importada": 0.0,
+        },
+        "operadora_normalizada": "ypf s.a.",
+        "operadora_conocida": True,
+        "avisos": [],
+    }}}
 
 
 class PedidoBarrido(BaseModel):
@@ -164,7 +208,28 @@ def operadoras():
         raise HTTPException(status_code=503, detail=str(e))
 
 
-@app.post("/predict", response_model=Respuesta, tags=["prediccion"])
+RESPUESTAS_PREDICT = {
+    422: {
+        "description": "El diseño no pasa las validaciones",
+        "content": {"application/json": {"example": {"detail": [{
+            "type": "greater_than_equal",
+            "loc": ["body", "longitud_rama_horizontal_m"],
+            "msg": "Input should be greater than or equal to 500",
+            "input": 120,
+        }]}}},
+    },
+    503: {
+        "description": "El modelo no está entrenado",
+        "content": {"application/json": {"example": {
+            "detail": "No se encontro models/modelo.joblib. Ejecuta: python src/entrenar.py"}}},
+    },
+}
+
+
+@app.post("/predict", response_model=Respuesta, tags=["prediccion"],
+          response_description=("La estimación a doce meses, con su rango, las variables de "
+                                "intensidad que calculó el servicio y los avisos"),
+          responses=RESPUESTAS_PREDICT)
 def predict(diseno: Diseno):
     """Estima la producción de los primeros doce meses a partir del diseño.
 
@@ -204,6 +269,28 @@ def barrido(pedido: PedidoBarrido):
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"No se pudo barrer: {e}")
+
+
+@app.get("/docs", response_class=HTMLResponse, include_in_schema=False)
+def documentacion():
+    """La documentación interactiva de Swagger, con la paleta del proyecto.
+
+    FastAPI la genera sola a partir del esquema OpenAPI; acá sólo se le inyectan los
+    estilos y una cinta de encabezado, de modo que no hay nada escrito a mano que pueda
+    quedar desactualizado respecto de los endpoints.
+    """
+    pagina = get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=f"{app.title} · documentación",
+        swagger_ui_parameters=app.swagger_ui_parameters,
+    ).body.decode()
+    try:
+        estilo = RUTA_ESTILO_DOCS.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        estilo = ""                      # sin el archivo, Swagger sin vestir sigue sirviendo
+    pagina = pagina.replace("</head>", estilo + "</head>", 1)
+    pagina = pagina.replace('<div id="swagger-ui">', CINTA_DOCS + '<div id="swagger-ui">', 1)
+    return HTMLResponse(pagina)
 
 
 @app.get("/demo", response_class=HTMLResponse, include_in_schema=False)

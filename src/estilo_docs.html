@@ -1,0 +1,135 @@
+<!-- Vestido de la pagina /docs: Swagger UI con la paleta del proyecto.
+
+     Se inyecta en el HTML que genera FastAPI. Son solo estilos y una cinta de
+     encabezado; la pagina sigue siendo la de Swagger y se arma sola a partir del
+     esquema OpenAPI, asi que no hay nada que mantener sincronizado a mano. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --navy: #112B4C;
+    --navy-oscuro: #0A1F3A;
+    --cian: #00B5CC;
+    --verde: #00697A;
+    --azul: #1D4F91;
+    --fondo: #F2F5F8;
+    --borde: #D9E0E8;
+    --gris: #4A6076;
+    --titulos: 'Archivo', 'Arial Narrow', Arial, sans-serif;
+    --cuerpo: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  }
+  body { background: var(--fondo); }
+
+  /* Fuera lo que no es de este servicio. */
+  .swagger-ui .topbar,                 /* la barra verde con el logo de Swagger */
+  .swagger-ui .scheme-container,       /* selector de servidores: hay uno solo */
+  .swagger-ui section.models,          /* los esquemas, ya desplegados en cada endpoint */
+  .swagger-ui .info__tos,
+  .swagger-ui .info hgroup.main a { display: none !important; }
+
+  /* --- Cinta propia -------------------------------------------------------- */
+  .cinta-pozos {
+    background: var(--navy); border-top: 6px solid var(--cian);
+    padding: 20px max(16px, env(safe-area-inset-left, 0px));
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px;
+  }
+  .cinta-pozos .interior {
+    max-width: 1460px; margin: 0 auto; width: 100%;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px;
+  }
+  .cinta-pozos h1 {
+    margin: 0; font-family: var(--titulos); font-size: 22px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: -0.2px; color: #FFFFFF;
+  }
+  .cinta-pozos p { margin: 0; color: #8CA3BD; font-size: 14px; font-family: var(--cuerpo); }
+  .cinta-pozos a {
+    margin-left: auto; font-family: var(--cuerpo); font-size: 14px; font-weight: 600;
+    color: #7FD9E6; text-decoration: none; white-space: nowrap;
+  }
+  .cinta-pozos a:hover { text-decoration: underline; }
+
+  /* --- Tipografia ---------------------------------------------------------- */
+  .swagger-ui, .swagger-ui .info p, .swagger-ui .info li, .swagger-ui .opblock-description-wrapper p,
+  .swagger-ui table thead tr td, .swagger-ui table thead tr th, .swagger-ui .parameter__name,
+  .swagger-ui .response-col_status, .swagger-ui .btn, .swagger-ui select, .swagger-ui label {
+    font-family: var(--cuerpo);
+  }
+  .swagger-ui .info .title,
+  .swagger-ui .opblock-tag,
+  .swagger-ui .opblock .opblock-summary-method,
+  .swagger-ui .tab li { font-family: var(--titulos); }
+  .swagger-ui .microlight, .swagger-ui .model, .swagger-ui .prop-type,
+  .swagger-ui input[type=text], .swagger-ui textarea { font-family: var(--mono) !important; }
+
+  .swagger-ui .info { margin: 34px 0 26px; }
+  .swagger-ui .info .title {
+    color: var(--navy); font-weight: 700; font-size: 34px; letter-spacing: -0.4px;
+  }
+  .swagger-ui .info .title small { background: var(--verde); }
+  .swagger-ui .info .title small.version-stamp { background: var(--azul); }
+  .swagger-ui .info .title small pre.version { background: transparent; color: #FFFFFF; }
+  .swagger-ui .info .title small pre { font-family: var(--mono); }
+  .swagger-ui .info .description { color: var(--gris); font-size: 15px; line-height: 1.6; }
+  .swagger-ui .info .description strong { color: var(--navy); }
+  .swagger-ui .info .description code {
+    font-family: var(--mono); background: #E4EBF2; color: var(--verde);
+    padding: 1px 5px; border-radius: 4px;
+  }
+
+  /* --- Bloques de endpoint ------------------------------------------------- */
+  .swagger-ui .opblock-tag {
+    font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--verde); border-bottom: 1px solid var(--borde);
+  }
+  .swagger-ui .opblock {
+    border-radius: 8px; box-shadow: 0 1px 2px rgba(17,43,76,.05), 0 6px 18px rgba(17,43,76,.05);
+    margin: 0 0 14px;
+  }
+  .swagger-ui .opblock .opblock-summary-method {
+    border-radius: 5px; font-weight: 700; letter-spacing: .5px; min-width: 84px;
+  }
+  .swagger-ui .opblock.opblock-post { border-color: var(--verde); background: rgba(0,105,122,.05); }
+  .swagger-ui .opblock.opblock-post .opblock-summary { border-color: var(--verde); }
+  .swagger-ui .opblock.opblock-post .opblock-summary-method { background: var(--verde); }
+  .swagger-ui .opblock.opblock-get { border-color: var(--azul); background: rgba(29,79,145,.04); }
+  .swagger-ui .opblock.opblock-get .opblock-summary { border-color: var(--azul); }
+  .swagger-ui .opblock.opblock-get .opblock-summary-method { background: var(--azul); }
+  .swagger-ui .opblock .opblock-summary-path { font-family: var(--mono); font-weight: 600; }
+  .swagger-ui .opblock .opblock-summary-description { color: var(--gris); }
+
+  /* --- Botones ------------------------------------------------------------- */
+  .swagger-ui .btn { border-radius: 6px; font-weight: 600; }
+  .swagger-ui .btn.execute {
+    background: var(--cian); border-color: var(--cian); color: #04222B;
+    font-family: var(--titulos); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .swagger-ui .btn.execute:hover { background: #00A0B5; border-color: #00A0B5; }
+  .swagger-ui .btn.try-out__btn { border-color: var(--verde); color: var(--verde); }
+  .swagger-ui .btn.btn-clear { border-color: var(--borde); color: var(--gris); }
+
+  /* --- La respuesta, que es lo que se mira ---------------------------------- */
+  .swagger-ui .responses-inner { padding: 18px 0 8px; }
+  .swagger-ui .responses-table .response-col_status { font-family: var(--mono); font-weight: 600; }
+  .swagger-ui .microlight {
+    background: var(--navy-oscuro) !important; border-radius: 8px; font-size: 13.5px;
+    line-height: 1.6; padding: 16px 18px !important;
+  }
+  .swagger-ui .highlight-code > .microlight code { white-space: pre-wrap; word-break: break-word; }
+  .swagger-ui .responses-inner h4, .swagger-ui .opblock-section-header h4 {
+    font-family: var(--titulos); font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--verde);
+  }
+  .swagger-ui .opblock-section-header { background: #E9EEF4; box-shadow: none; }
+  .swagger-ui .opblock-body pre.microlight { margin: 0; }
+  .swagger-ui table tbody tr td { border-color: var(--borde); }
+  .swagger-ui .parameter__name { font-family: var(--mono); font-weight: 600; color: var(--navy); }
+  .swagger-ui .parameter__type { font-family: var(--mono); color: var(--gris); }
+
+  @media (max-width: 640px) {
+    .swagger-ui .info .title { font-size: 26px; }
+    .cinta-pozos a { margin-left: 0; }
+  }
+</style>
