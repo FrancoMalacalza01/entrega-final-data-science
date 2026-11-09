@@ -307,6 +307,14 @@ function bonito(max) {                     // un tope redondo para el eje vertic
   return Math.ceil(max / paso) * paso;
 }
 
+function esperando(texto) {
+  $("grafico").innerHTML =
+    `<text x="${ANCHO / 2}" y="${ALTO / 2 - 6}" fill="#8CA3BD" font-size="16"`
+    + ` text-anchor="middle">${texto}</text>`
+    + `<text x="${ANCHO / 2}" y="${ALTO / 2 + 22}" fill="#56718F" font-size="14"`
+    + ` text-anchor="middle">El servicio corre en una capa gratuita y arranca dormido.</text>`;
+}
+
 function dibujar(datos) {
   const curva = datos.curva;
   const x0 = M.izquierda, x1 = ANCHO - M.derecha;
@@ -438,6 +446,7 @@ function pedir({ inmediato = false } = {}) {
     const estado = $("estado");
     const lento = setTimeout(() => {
       estado.textContent = "Despertando el servicio… la primera consulta puede tardar un minuto.";
+      if (!$("grafico").querySelector("polyline")) esperando("Despertando el servicio…");
     }, 1200);
     try {
       const r = await fetch("/barrido", {
@@ -519,27 +528,30 @@ $("operadora").addEventListener("change", () => pedir({ inmediato: true }));
 // Arranque
 // --------------------------------------------------------------------------- //
 
+function agregarOperadora(nombre) {
+  const op = document.createElement("option");
+  op.value = nombre;
+  op.textContent = nombre;
+  $("operadora").appendChild(op);
+}
+
 (async () => {
   aplicar(PRESETS["Pozo típico"]);
   marcar("#presets", $("presets").children[1]);
   marcar("#ejes", document.querySelector("#ejes button"));
+  // La de siempre ya puesta, para que el desplegable no arranque vacio mientras
+  // llega la lista: en frio esa espera puede ser de casi un minuto.
+  agregarOperadora("ypf s.a.");
+  esperando("Pidiéndole la curva al modelo…");
+  pedir({ inmediato: true });
   try {
     const r = await fetch("/operadoras");
     const { operadoras_conocidas } = await r.json();
-    for (const o of operadoras_conocidas) {
-      const op = document.createElement("option");
-      op.value = o;
-      op.textContent = o;
-      $("operadora").appendChild(op);
-    }
-    $("operadora").value = "ypf s.a.";
-  } catch (e) {
-    const op = document.createElement("option");
-    op.value = "ypf s.a.";
-    op.textContent = "ypf s.a.";
-    $("operadora").appendChild(op);
-  }
-  pedir({ inmediato: true });
+    const elegida = $("operadora").value;
+    $("operadora").innerHTML = "";
+    for (const o of operadoras_conocidas) agregarOperadora(o);
+    $("operadora").value = operadoras_conocidas.includes(elegida) ? elegida : "ypf s.a.";
+  } catch (e) { /* se queda con la unica que ya esta cargada */ }
 })();
 </script>
 </body>
