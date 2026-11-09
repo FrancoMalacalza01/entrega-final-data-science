@@ -104,7 +104,8 @@ entrega-final-data-science/
 │   ├── entrenar.py                   # entrena y guarda el modelo
 │   ├── model.py                      # carga el modelo y predice
 │   ├── app.py                        # la API FastAPI
-│   └── demo.html                     # el panel interactivo que sirve /demo
+│   ├── demo.html                     # el panel interactivo que sirve /demo
+│   └── estilo_docs.html              # el vestido de /docs: estilos y encabezado
 └── notebooks/
     ├── 01_eda_preentrega2.ipynb         # análisis exploratorio y limpieza
     ├── 02_modelado_preentrega3.ipynb    # regresión: cuántos m³ produce un pozo
@@ -701,7 +702,8 @@ src/
 ├── entrenar.py          reconstruye el dataset, mide, reentrena y guarda el artefacto
 ├── model.py             carga el modelo y predice; nada de HTTP
 ├── app.py               FastAPI; nada de modelo
-└── demo.html            el panel; pide los datos a /barrido y dibuja
+├── demo.html            el panel; pide los datos a /barrido y dibuja
+└── estilo_docs.html     los estilos que se le inyectan a /docs
 models/
 ├── modelo.joblib        el Random Forest entrenado (3,7 MB)
 └── metadata.json        ficha: fecha, pozos, métricas, operadoras, rangos, versiones

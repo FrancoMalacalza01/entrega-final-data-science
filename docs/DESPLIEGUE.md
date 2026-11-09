@@ -79,8 +79,8 @@ curl https://pozos-vaca-muerta.onrender.com/health
 curl https://pozos-vaca-muerta.onrender.com/modelo
 ```
 
-Y en el navegador, **`https://pozos-vaca-muerta.onrender.com/docs`**: ésa es la dirección que
-va en la presentación.
+Y en el navegador, las dos direcciones que van en la presentación:
+**`/demo`**, el panel con los deslizadores, y **`/docs`**, la documentación interactiva.
 
 ### ⚠️ Lo que hay que saber antes de la demostración
 
@@ -199,10 +199,21 @@ docker run -e PORT=9000 -p 9000:9000 pozos-api
 
 ## Después de desplegar
 
-1. **Actualizar la presentación.** La diapositiva de demostración dice «documentación
-   interactiva en /docs»; conviene reemplazarlo por la dirección real.
-2. **Actualizar el README**, en la sección *La API de predicción*, con la URL pública.
-3. **Dejar la pestaña abierta** antes de presentar, sobre todo con Render.
+1. **Comprobar las tres direcciones** (abajo). La de `/health` es la que conviene abrir
+   primero: es la más liviana y es la que despierta el servicio.
+2. **Revisar que la presentación y el README nombren la dirección real.** Ya lo hacen: la
+   diapositiva de demostración y la guía de defensa llevan `/demo` y `/docs`, y el README
+   las tiene en el encabezado. Si el servicio cambia de nombre, hay que tocar esos tres.
+3. **Dejar las dos pestañas abiertas** diez minutos antes de presentar, sobre todo con
+   Render.
+
+### Las tres direcciones que hay que comprobar
+
+| Dirección | Qué tiene que verse |
+|---|---|
+| `/health` | `{"estado":"ok","modelo_cargado":true}` |
+| `/demo` | El panel, con los deslizadores y la curva |
+| `/docs` | La documentación interactiva, con la cabecera azul del proyecto |
 
 ---
 

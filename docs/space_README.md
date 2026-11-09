@@ -16,8 +16,9 @@ doce meses, a partir de las decisiones de **diseño de completación** que se to
 fracturarlo: metros de rama horizontal, cantidad de etapas, toneladas de arena, metros cúbicos
 de agua, presión y potencia de los equipos.
 
-👉 **La documentación interactiva está en [`/docs`](./docs)** — se puede probar el endpoint
-desde el navegador, sin escribir código.
+👉 **Dos puertas, las dos desde el navegador y sin escribir código:**
+[`/demo`](./demo), un panel con deslizadores para mover el diseño del pozo y ver cómo responde
+el modelo, y [`/docs`](./docs), la documentación interactiva de la API.
 
 ## Cómo probarlo
 
