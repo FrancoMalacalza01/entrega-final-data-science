@@ -92,7 +92,7 @@ entrega-final-data-science/
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
 │   ├── presentacion.pdf              # 17 diapositivas, versión de 15 minutos
 │   ├── presentacion.pptx             # las mismas diapositivas, con las notas del orador
-│   ├── presentacion_5min.pdf         # 7 diapositivas, versión de 5 minutos entre tres
+│   ├── presentacion_5min.pdf         # 13 diapositivas, versión de 5 minutos entre tres
 │   ├── presentacion_5min.pptx        # ídem, con las notas repartidas por orador
 │   └── defensa_5min.pdf              # guion de los 5 minutos y las preguntas previsibles
 ├── Dockerfile                        # para desplegar la API
@@ -743,8 +743,10 @@ Docker, con qué revisar cuando algo falla.
 piden al servicio, con los números que devuelve, para mostrar la API sin improvisar.
 
 ⏱️ **[Presentación de 5 minutos](docs/presentacion_5min.pdf)** y su
-**[guion de defensa](docs/defensa_5min.pdf)** — siete diapositivas repartidas en partes
-iguales entre los tres, con las preguntas previsibles y su respuesta.
+**[guion de defensa](docs/defensa_5min.pdf)** — trece diapositivas con el orden que pide la
+cátedra (objetivo, hipótesis, metodología, limpieza, clustering, modelo, predicción contra
+real, conclusiones y propuesta), repartidas en partes iguales entre los tres, con veinte
+preguntas previsibles y su respuesta.
 
 ## Uso responsable del modelo
 
