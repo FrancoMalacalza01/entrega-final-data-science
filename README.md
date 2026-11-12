@@ -90,6 +90,7 @@ entrega-final-data-science/
 │   ├── space_README.md               # README listo para Hugging Face Spaces
 │   ├── guion_demo.md                 # la demostración en vivo, paso a paso
 │   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
+│   ├── defensa_presentacion.pdf      # el guion de las 17 diapositivas y las preguntas previsibles
 │   ├── presentacion.pdf              # 17 diapositivas, versión de 15 minutos
 │   ├── presentacion.pptx             # las mismas diapositivas, con las notas del orador
 │   ├── presentacion_5min.pdf         # 13 diapositivas, versión de 5 minutos entre tres
@@ -741,6 +742,10 @@ Docker, con qué revisar cuando algo falla.
 
 🎬 **[Guion de la demostración en vivo](docs/guion_demo.md)** — los tres pozos que se le
 piden al servicio, con los números que devuelve, para mostrar la API sin improvisar.
+
+🎤 **[Guion de la defensa](docs/defensa_presentacion.pdf)** — las diecisiete diapositivas
+repartidas entre los tres, con el tiempo de cada una, qué conviene no decir, la demostración
+en vivo paso a paso y veinte preguntas previsibles con su respuesta.
 
 ⏱️ **[Presentación de 5 minutos](docs/presentacion_5min.pdf)** y su
 **[guion de defensa](docs/defensa_5min.pdf)** — trece diapositivas con el orden que pide la
