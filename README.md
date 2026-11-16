@@ -734,17 +734,7 @@ sí, porque es la que serializó el modelo.
 Docker, con qué revisar cuando algo falla.
 
 🎬 **[Guion de la demostración en vivo](docs/guion_demo.md)** — los tres pozos que se le
-piden al servicio, con los números que devuelve, para mostrar la API sin improvisar.
-
-🎤 **[Guion de la defensa](docs/defensa_presentacion.pdf)** — las diecisiete diapositivas
-repartidas entre los tres, con el tiempo de cada una, qué conviene no decir, la demostración
-en vivo paso a paso y veinte preguntas previsibles con su respuesta.
-
-⏱️ **[Presentación de 5 minutos](docs/presentacion_5min.pdf)** y su
-**[guion de defensa](docs/defensa_5min.pdf)** — trece diapositivas con el orden que pide la
-cátedra (objetivo, hipótesis, metodología, limpieza, clustering, modelo, predicción contra
-real, conclusiones y propuesta), repartidas en partes iguales entre los tres, con veinte
-preguntas previsibles y su respuesta.
+piden al servicio, con los números que devuelve.
 
 ## Uso responsable del modelo
 
