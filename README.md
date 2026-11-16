@@ -89,13 +89,6 @@ entrega-final-data-science/
 │   ├── DESPLIEGUE.md                 # cómo poner la API en un servidor público
 │   ├── space_README.md               # README listo para Hugging Face Spaces
 │   ├── guion_demo.md                 # la demostración en vivo, paso a paso
-│   ├── guia_de_defensa.pdf           # el proyecto explicado sin jerga, para la presentación
-│   ├── defensa_presentacion.pdf      # el guion de las 17 diapositivas y las preguntas previsibles
-│   ├── presentacion.pdf              # 17 diapositivas, versión de 15 minutos
-│   ├── presentacion.pptx             # las mismas diapositivas, con las notas del orador
-│   ├── presentacion_5min.pdf         # 13 diapositivas, versión de 5 minutos entre tres
-│   ├── presentacion_5min.pptx        # ídem, con las notas repartidas por orador
-│   └── defensa_5min.pdf              # guion de los 5 minutos y las preguntas previsibles
 ├── Dockerfile                        # para desplegar la API
 ├── requirements-api.txt              # dependencias del servicio, sin las del análisis
 ├── ejemplo_pozo.json                 # cuerpo de ejemplo para POST /predict
